@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using StreamCrate.Core.Models;
+using StreamCrate.Infrastructure.Diagnostics;
 
 namespace StreamCrate.Infrastructure.Processes;
 
@@ -40,7 +41,7 @@ public sealed class YtDlpProcessRunner
         await process.WaitForExitAsync(cancellationToken);
         if (process.ExitCode != 0)
         {
-            throw new InvalidOperationException(string.IsNullOrWhiteSpace(error) ? "下載失敗。" : error);
+            throw new InvalidOperationException(string.IsNullOrWhiteSpace(error) ? "下載失敗。" : SensitiveDataSanitizer.Sanitize(error));
         }
     }
 }

@@ -32,6 +32,26 @@ public sealed class DownloadQueueServiceTests
         await queue.DisposeAsync();
     }
 
+    [Fact]
+    public async Task Queue_preserves_the_failure_message_for_the_user_interface()
+    {
+        var failed = new TaskCompletionSource<DownloadJob>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var queue = new DownloadQueueService((_, _) => throw new InvalidOperationException("FFmpeg 找不到可合併的音訊串流。"));
+        queue.JobChanged += (_, job) =>
+        {
+            if (job.State == DownloadJobState.Failed)
+            {
+                failed.TrySetResult(job);
+            }
+        };
+
+        await queue.EnqueueAsync(CreateRequest("failed"));
+        var job = await failed.Task.WaitAsync(TimeSpan.FromSeconds(2));
+
+        Assert.Equal("FFmpeg 找不到可合併的音訊串流。", job.ErrorMessage);
+        await queue.DisposeAsync();
+    }
+
     private static DownloadRequest CreateRequest(string id) => DownloadRequest.CreateVideo(
         new MediaItem("test", id, id, new Uri($"https://example.test/{id}"), null),
         @"C:\Downloads",

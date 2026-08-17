@@ -78,7 +78,15 @@ public sealed class DownloadJob
 
     public DownloadJobState State { get; private set; }
 
+    public string? ErrorMessage { get; private set; }
+
     public void SetState(DownloadJobState state) => State = state;
+
+    public void SetFailure(string message)
+    {
+        ErrorMessage = message;
+        State = DownloadJobState.Failed;
+    }
 }
 
 public sealed record DownloadProgress(

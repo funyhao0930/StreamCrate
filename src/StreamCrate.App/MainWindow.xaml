@@ -27,7 +27,7 @@
                         <ComboBoxItem Content="Chrome" Tag="chrome" />
                         <ComboBoxItem Content="Edge" Tag="edge" />
                         <ComboBoxItem Content="Firefox" Tag="firefox" />
-                        <ComboBoxItem Content="cookies.txt（本次）" Tag="file" />
+                        <ComboBoxItem Content="cookies.txt（選取檔案）" Tag="file" />
                     </ComboBox>
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <ComboBox x:Name="FormatBox" Header="格式" SelectedIndex="0" Width="180"><ComboBoxItem Content="MP4" /><ComboBoxItem Content="MP3" /></ComboBox>

@@ -1,9 +1,11 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Windows.Storage.Pickers;
 using StreamCrate.Core.Models;
 using StreamCrate.Infrastructure.Processes;
 using StreamCrate.Infrastructure.Tooling;
 using StreamCrate.Infrastructure.Queue;
+using StreamCrate.Infrastructure.Diagnostics;
 
 namespace StreamCrate.App;
 
@@ -13,6 +15,7 @@ public sealed partial class MainWindow : Window
     private readonly DownloadQueueService _queue;
     private bool _toolsReady;
     private MediaItem? _probedMedia;
+    private CookieSelection _probedCookies = CookieSelection.None;
     public MainWindow()
     {
         InitializeComponent();
@@ -75,16 +78,23 @@ public sealed partial class MainWindow : Window
             }
         }
 
+        var cookies = await GetCookieSelectionAsync();
+        if (cookies is null)
+        {
+            return;
+        }
+
         try
         {
             StatusBar.Severity = InfoBarSeverity.Informational;
             StatusBar.Title = "正在解析";
             StatusBar.Message = "正在讀取媒體資訊，尚未開始下載。";
-            var result = await new YtDlpMediaProbeService(_toolchain.YtDlpPath).ProbeAsync(uri, GetCookieSelection());
+            var result = await new YtDlpMediaProbeService(_toolchain.YtDlpPath).ProbeAsync(uri, cookies);
             ResultText.Text = result.IsPlaylist
                 ? $"已找到播放清單：{result.Playlist!.Title}（{result.Playlist.Items.Count} 部）"
                 : $"已找到影片：{result.Media!.Title}";
             _probedMedia = result.Media ?? result.Playlist?.Items.FirstOrDefault();
+            _probedCookies = cookies;
             QueueButton.IsEnabled = _probedMedia is not null;
             StatusBar.Title = "解析完成";
             StatusBar.Message = "請選擇格式與畫質後加入佇列。";
@@ -93,18 +103,39 @@ public sealed partial class MainWindow : Window
         catch (Exception exception)
         {
             StatusBar.Title = "解析失敗";
-            StatusBar.Message = exception.Message;
+            StatusBar.Message = UserFacingErrorMapper.Map(exception.Message);
             StatusBar.Severity = InfoBarSeverity.Error;
         }
     }
 
-    private CookieSelection GetCookieSelection() => ((CookieBox.SelectedItem as ComboBoxItem)?.Tag?.ToString()) switch
+    private async Task<CookieSelection?> GetCookieSelectionAsync()
     {
-        "chrome" => new CookieSelection(CookieSource.Chrome),
-        "edge" => new CookieSelection(CookieSource.Edge),
-        "firefox" => new CookieSelection(CookieSource.Firefox),
-        _ => CookieSelection.None,
-    };
+        var source = (CookieBox.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+        if (source != "file")
+        {
+            return source switch
+            {
+                "chrome" => new CookieSelection(CookieSource.Chrome),
+                "edge" => new CookieSelection(CookieSource.Edge),
+                "firefox" => new CookieSelection(CookieSource.Firefox),
+                _ => CookieSelection.None,
+            };
+        }
+
+        var picker = new FileOpenPicker();
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(this));
+        picker.FileTypeFilter.Add(".txt");
+        var file = await picker.PickSingleFileAsync();
+        if (file is null)
+        {
+            StatusBar.Title = "未選取 cookies.txt";
+            StatusBar.Message = "請選取僅供本次使用的 Netscape cookies.txt 檔案。";
+            StatusBar.Severity = InfoBarSeverity.Warning;
+            return null;
+        }
+
+        return new CookieSelection(CookieSource.CookiesFile, file.Path);
+    }
 
     private async void QueueClicked(object sender, RoutedEventArgs args)
     {
@@ -123,7 +154,7 @@ public sealed partial class MainWindow : Window
             _ => VideoQuality.Best,
         };
         var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
-        await _queue.EnqueueAsync(new DownloadRequest(_probedMedia, directory, format, quality, GetCookieSelection()));
+        await _queue.EnqueueAsync(new DownloadRequest(_probedMedia, directory, format, quality, _probedCookies));
         StatusBar.Title = "已加入佇列";
         StatusBar.Message = "StreamCrate 一次只下載一項工作。";
         StatusBar.Severity = InfoBarSeverity.Informational;
@@ -153,7 +184,7 @@ public sealed partial class MainWindow : Window
         else if (job.State is DownloadJobState.Failed or DownloadJobState.Cancelled)
         {
             StatusBar.Title = job.State == DownloadJobState.Failed ? "下載失敗" : "下載已取消";
-            StatusBar.Message = job.Request.Media.Title;
+            StatusBar.Message = job.ErrorMessage is null ? job.Request.Media.Title : UserFacingErrorMapper.Map(job.ErrorMessage);
             StatusBar.Severity = InfoBarSeverity.Error;
         }
     });

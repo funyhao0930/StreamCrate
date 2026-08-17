@@ -43,9 +43,9 @@ public sealed class DownloadQueueService : IAsyncDisposable
                 {
                     job.SetState(DownloadJobState.Cancelled);
                 }
-                catch
+                catch (Exception exception)
                 {
-                    job.SetState(DownloadJobState.Failed);
+                    job.SetFailure(exception.Message);
                 }
 
                 JobChanged?.Invoke(this, job);
