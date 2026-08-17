@@ -1,0 +1,36 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamCrate.Core", "src\StreamCrate.Core\StreamCrate.Core.csproj", "{D62201B8-BFE2-4C8B-8D7E-6F4704027A2D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamCrate.Infrastructure", "src\StreamCrate.Infrastructure\StreamCrate.Infrastructure.csproj", "{E4A14D7F-6B34-4C36-8A4A-2D0C14CB9145}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamCrate.App", "src\StreamCrate.App\StreamCrate.App.csproj", "{FD837B06-9A8E-4A7A-A119-A1B35C32DA19}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamCrate.Tests", "tests\StreamCrate.Tests\StreamCrate.Tests.csproj", "{484B8CF1-8EE1-4A85-9071-8C8F00C5EE91}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D62201B8-BFE2-4C8B-8D7E-6F4704027A2D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D62201B8-BFE2-4C8B-8D7E-6F4704027A2D}.Debug|x64.Build.0 = Debug|Any CPU
+		{D62201B8-BFE2-4C8B-8D7E-6F4704027A2D}.Release|x64.ActiveCfg = Release|Any CPU
+		{D62201B8-BFE2-4C8B-8D7E-6F4704027A2D}.Release|x64.Build.0 = Release|Any CPU
+		{E4A14D7F-6B34-4C36-8A4A-2D0C14CB9145}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E4A14D7F-6B34-4C36-8A4A-2D0C14CB9145}.Debug|x64.Build.0 = Debug|Any CPU
+		{E4A14D7F-6B34-4C36-8A4A-2D0C14CB9145}.Release|x64.ActiveCfg = Release|Any CPU
+		{E4A14D7F-6B34-4C36-8A4A-2D0C14CB9145}.Release|x64.Build.0 = Release|Any CPU
+		{FD837B06-9A8E-4A7A-A119-A1B35C32DA19}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FD837B06-9A8E-4A7A-A119-A1B35C32DA19}.Debug|x64.Build.0 = Debug|Any CPU
+		{FD837B06-9A8E-4A7A-A119-A1B35C32DA19}.Release|x64.ActiveCfg = Release|Any CPU
+		{FD837B06-9A8E-4A7A-A119-A1B35C32DA19}.Release|x64.Build.0 = Release|Any CPU
+		{484B8CF1-8EE1-4A85-9071-8C8F00C5EE91}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{484B8CF1-8EE1-4A85-9071-8C8F00C5EE91}.Debug|x64.Build.0 = Debug|Any CPU
+		{484B8CF1-8EE1-4A85-9071-8C8F00C5EE91}.Release|x64.ActiveCfg = Release|Any CPU
+		{484B8CF1-8EE1-4A85-9071-8C8F00C5EE91}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
