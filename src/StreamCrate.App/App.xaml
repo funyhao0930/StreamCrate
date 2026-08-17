@@ -3,6 +3,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
-        <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+            <SolidColorBrush x:Key="DeepSeaBaseBrush" Color="#081C2D" />
+            <SolidColorBrush x:Key="DeepSeaCardBrush" Color="#12354A" />
+            <SolidColorBrush x:Key="DeepSeaAccentBrush" Color="#5EEAD4" />
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

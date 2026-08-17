@@ -24,6 +24,12 @@ public enum DownloadFormat
     Mp3,
 }
 
+public enum AppTheme
+{
+    Light,
+    Dark,
+}
+
 public enum DownloadJobState
 {
     Queued,
@@ -78,15 +84,19 @@ public sealed class DownloadJob
 
     public DownloadJobState State { get; private set; }
 
-    public string? ErrorMessage { get; private set; }
+    public DownloadProgress? Progress { get; private set; }
 
-    public void SetState(DownloadJobState state) => State = state;
+    public string? ErrorCategory { get; private set; }
 
-    public void SetFailure(string message)
+    public DateTimeOffset CreatedAt { get; } = DateTimeOffset.UtcNow;
+
+    public void SetState(DownloadJobState state, string? errorCategory = null)
     {
-        ErrorMessage = message;
-        State = DownloadJobState.Failed;
+        State = state;
+        ErrorCategory = errorCategory;
     }
+
+    public void SetProgress(DownloadProgress progress) => Progress = progress;
 }
 
 public sealed record DownloadProgress(
@@ -110,3 +120,16 @@ public sealed record HistoryEntry(
     DownloadJobState State,
     string? ErrorCategory,
     DateTimeOffset CreatedAt);
+
+public sealed record AppSettings(
+    string DownloadDirectory,
+    DownloadFormat DefaultFormat,
+    VideoQuality DefaultQuality,
+    AppTheme Theme)
+{
+    public static AppSettings CreateDefault() => new(
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+        DownloadFormat.Mp4,
+        VideoQuality.Best,
+        AppTheme.Dark);
+}
