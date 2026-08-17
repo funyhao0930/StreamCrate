@@ -124,13 +124,13 @@ public sealed class DownloadQueueService : IAsyncDisposable
                 {
                     job.SetState(DownloadJobState.Cancelled);
                 }
-                catch (InvalidOperationException)
+                catch (InvalidOperationException exception)
                 {
-                    job.SetState(DownloadJobState.Failed, "下載工具錯誤");
+                    job.SetFailure(exception.Message, "下載工具錯誤");
                 }
-                catch
+                catch (Exception exception)
                 {
-                    job.SetState(DownloadJobState.Failed, "未預期錯誤");
+                    job.SetFailure(exception.Message, "未預期錯誤");
                 }
                 finally
                 {

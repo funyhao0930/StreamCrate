@@ -88,6 +88,8 @@ public sealed class DownloadJob
 
     public string? ErrorCategory { get; private set; }
 
+    public string? ErrorMessage { get; private set; }
+
     public DateTimeOffset CreatedAt { get; } = DateTimeOffset.UtcNow;
 
     public void SetState(DownloadJobState state, string? errorCategory = null)
@@ -97,6 +99,13 @@ public sealed class DownloadJob
     }
 
     public void SetProgress(DownloadProgress progress) => Progress = progress;
+
+    public void SetFailure(string message, string errorCategory)
+    {
+        ErrorMessage = message;
+        State = DownloadJobState.Failed;
+        ErrorCategory = errorCategory;
+    }
 }
 
 public sealed record DownloadProgress(
