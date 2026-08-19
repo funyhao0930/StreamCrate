@@ -10,6 +10,7 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Platforms>x64</Platforms>
     <AssemblyName>StreamCrate.App</AssemblyName>
+    <ApplicationIcon>Assets\StreamCrate.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
@@ -19,5 +20,9 @@
   <ItemGroup>
     <ProjectReference Include="../StreamCrate.Core/StreamCrate.Core.csproj" />
     <ProjectReference Include="../StreamCrate.Infrastructure/StreamCrate.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\StreamCrate.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Assets\StreamCrateMark.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

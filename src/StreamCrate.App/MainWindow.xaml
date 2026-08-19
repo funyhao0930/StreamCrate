@@ -15,8 +15,8 @@
             SelectionChanged="NavigationSelectionChanged">
             <NavigationView.PaneHeader>
                 <StackPanel Orientation="Horizontal" Spacing="10" Padding="12,8,0,8">
-                    <Border Width="26" Height="26" CornerRadius="8" Background="{ThemeResource AppPrimaryBrush}">
-                        <TextBlock Text="S" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" />
+                    <Border Width="26" Height="26" CornerRadius="8" Background="Transparent">
+                        <Image Source="ms-appx:///Assets/StreamCrateMark.png" Stretch="Uniform" />
                     </Border>
                     <TextBlock Text="StreamCrate" VerticalAlignment="Center" FontFamily="Segoe UI Variable Display" FontWeight="SemiBold" Foreground="{ThemeResource AppTextBrush}" />
                 </StackPanel>
