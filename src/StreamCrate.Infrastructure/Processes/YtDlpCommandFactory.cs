@@ -65,10 +65,30 @@ public sealed class YtDlpCommandFactory
             : $"bv*[height<={height}][ext=mp4]+ba[ext=m4a]/b[height<={height}][ext=mp4]/bv*[height<={height}]+ba/b";
     }
 
-    private static string BuildOutputTemplate(DownloadRequest request) =>
-        request.PlaylistTitle is null
-            ? "%(title)s [%(id)s].%(ext)s"
-            : "%(playlist_title)s/%(playlist_index)02d - %(title)s [%(id)s].%(ext)s";
+    private static string BuildOutputTemplate(DownloadRequest request)
+    {
+        if (request.PlaylistTitle is null)
+        {
+            return "%(title)s [%(id)s].%(ext)s";
+        }
+
+        var playlistTitle = SanitizeFolderName(request.PlaylistTitle);
+        var playlistIndex = request.PlaylistIndex.GetValueOrDefault();
+        return $"{playlistTitle}/{playlistIndex:D2} - %(title)s [%(id)s].%(ext)s";
+    }
+
+    private static string SanitizeFolderName(string value)
+    {
+        const string invalidCharacters = "<>:\"/\\|?*";
+        var sanitized = new string(value
+            .Trim()
+            .Select(character => character == '%' ? '％' :
+                char.IsControl(character) || invalidCharacters.Contains(character) ? '_' : character)
+            .ToArray())
+            .TrimEnd('.', ' ');
+
+        return string.IsNullOrWhiteSpace(sanitized) ? "播放清單" : sanitized;
+    }
 
     private static void AddCookies(List<string> arguments, CookieSelection cookies)
     {

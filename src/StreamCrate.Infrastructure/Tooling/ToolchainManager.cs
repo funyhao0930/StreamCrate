@@ -7,8 +7,10 @@ namespace StreamCrate.Infrastructure.Tooling;
 
 public sealed class ToolchainManager
 {
-    private const string YtDlpReleasesApi = "https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest";
+    private const string YtDlpReleasesApi = "https://api.github.com/repos/yt-dlp/yt-dlp-nightly-builds/releases/latest";
     private const string FfmpegReleasesApi = "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest";
+    private const string DenoReleasesApi = "https://api.github.com/repos/denoland/deno/releases/latest";
+    private const string DenoArchiveName = "deno-x86_64-pc-windows-msvc.zip";
     private readonly HttpClient _httpClient;
     private readonly object _ensureLock = new();
     private readonly string _toolDirectory;
@@ -21,9 +23,11 @@ public sealed class ToolchainManager
         _toolDirectory = toolDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StreamCrate", "tools");
     }
 
-    public string YtDlpPath => Path.Combine(_toolDirectory, "yt-dlp.exe");
+    public string YtDlpPath => Path.Combine(_toolDirectory, "yt-dlp-nightly.exe");
 
     public string FfmpegPath => Path.Combine(_toolDirectory, "ffmpeg.exe");
+
+    private string DenoPath => Path.Combine(_toolDirectory, "deno.exe");
 
     public async Task<IReadOnlyList<ToolVersion>> EnsureAvailableAsync(CancellationToken cancellationToken = default)
     {
@@ -65,10 +69,16 @@ public sealed class ToolchainManager
             await DownloadFfmpegAsync(CancellationToken.None);
         }
 
+        if (!File.Exists(DenoPath))
+        {
+            await DownloadDenoAsync(CancellationToken.None);
+        }
+
         return
         [
             new ToolVersion("yt-dlp", "managed", YtDlpPath),
             new ToolVersion("ffmpeg", "managed", FfmpegPath),
+            new ToolVersion("Deno", "managed", DenoPath),
         ];
     }
 
@@ -99,6 +109,32 @@ public sealed class ToolchainManager
         File.Copy(sourcePath, temporaryPath, overwrite: true);
         File.Move(temporaryPath, FfmpegPath, overwrite: true);
         File.Delete(archivePath);
+    }
+
+    private async Task DownloadDenoAsync(CancellationToken cancellationToken)
+    {
+        using var release = await GetReleaseAsync(DenoReleasesApi, cancellationToken);
+        var archiveUrl = FindAssetUrl(release.RootElement, DenoArchiveName);
+        var checksumUrl = FindAssetUrl(release.RootElement, $"{DenoArchiveName}.sha256sum");
+        var checksum = await _httpClient.GetStringAsync(checksumUrl, cancellationToken);
+        var expectedHash = FindChecksum(checksum, DenoArchiveName);
+        var archivePath = Path.Combine(_toolDirectory, "deno.zip.download");
+        await DownloadVerifiedFileAsync(archiveUrl, expectedHash, archivePath, cancellationToken);
+
+        var temporaryPath = DenoPath + ".download";
+        try
+        {
+            using var archive = ZipFile.OpenRead(archivePath);
+            var executable = archive.Entries.Single(entry =>
+                string.Equals(entry.FullName, "deno.exe", StringComparison.OrdinalIgnoreCase));
+            executable.ExtractToFile(temporaryPath, overwrite: true);
+            File.Move(temporaryPath, DenoPath, overwrite: true);
+        }
+        finally
+        {
+            File.Delete(temporaryPath);
+            File.Delete(archivePath);
+        }
     }
 
     private async Task DownloadVerifiedFileAsync(Uri source, string expectedHash, string destinationPath, CancellationToken cancellationToken)
@@ -149,12 +185,26 @@ public sealed class ToolchainManager
         foreach (var line in content.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            if (parts.Length >= 2 && parts[^1].TrimStart('*') == assetName)
+            if (parts.Length >= 2 && parts[^1].TrimStart('*') == assetName && IsSha256(parts[0]))
             {
                 return parts[0];
+            }
+
+            var separatorIndex = line.IndexOf(':');
+            if (separatorIndex >= 0 &&
+                line[..separatorIndex].Trim().Equals("Hash", StringComparison.OrdinalIgnoreCase))
+            {
+                var hash = line[(separatorIndex + 1)..].Trim();
+                if (IsSha256(hash))
+                {
+                    return hash;
+                }
             }
         }
 
         throw new InvalidDataException($"找不到 {assetName} 的 SHA-256 雜湊。");
     }
+
+    private static bool IsSha256(string value) =>
+        value.Length == 64 && value.All(Uri.IsHexDigit);
 }

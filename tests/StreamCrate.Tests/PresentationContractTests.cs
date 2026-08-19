@@ -1,6 +1,7 @@
 using System.Reflection;
 using StreamCrate.App;
 using StreamCrate.Core.Models;
+using StreamCrate.Infrastructure.Processes;
 
 namespace StreamCrate.Tests;
 
@@ -75,6 +76,28 @@ public sealed class PresentationContractTests
         var text = InvokeStateText(state);
 
         Assert.Equal(expected, text);
+    }
+
+    [Fact]
+    public void YouTube_403_retry_policy_only_retries_stream_data_failures_and_forces_ipv4_once()
+    {
+        var type = typeof(MainWindow).Assembly.GetType("StreamCrate.App.Presentation.YouTube403RetryPolicy");
+        Assert.NotNull(type);
+        var shouldRetry = type.GetMethod("ShouldRetry", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        var withIpv4 = type.GetMethod("WithForceIpv4", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        Assert.NotNull(shouldRetry);
+        Assert.NotNull(withIpv4);
+
+        const string stream403 = "ERROR: unable to download video data: HTTP Error 403: Forbidden";
+        Assert.True(Assert.IsType<bool>(shouldRetry.Invoke(null, ["Youtube", stream403])));
+        Assert.False(Assert.IsType<bool>(shouldRetry.Invoke(null, ["Vimeo", stream403])));
+        Assert.False(Assert.IsType<bool>(shouldRetry.Invoke(null, ["Youtube", "ERROR: This video is DRM protected"])));
+
+        var original = new ProcessSpecification("yt-dlp.exe", ["--newline", "https://example.test/watch?v=video"], ["--newline", "https://example.test/watch?v=video"]);
+        var fallback = Assert.IsType<ProcessSpecification>(withIpv4.Invoke(null, [original]));
+        Assert.Equal("--force-ipv4", fallback.Arguments[0]);
+        Assert.Equal("--force-ipv4", fallback.RedactedDisplayArguments[0]);
+        Assert.Single(fallback.Arguments, argument => argument == "--force-ipv4");
     }
 
     private static IReadOnlyList<DownloadRequest> InvokePlaylistBuilder(

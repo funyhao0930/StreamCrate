@@ -18,6 +18,8 @@ public sealed class UserFacingErrorMapperTests
     {
         var message = UserFacingErrorMapper.Map("ERROR: Failed to decrypt with DPAPI.");
 
+        Assert.Contains("App-Bound Encryption", message);
+        Assert.Contains("Firefox", message);
         Assert.Contains("cookies.txt", message);
         Assert.Contains("僅供本次使用", message);
     }
@@ -29,5 +31,17 @@ public sealed class UserFacingErrorMapperTests
 
         Assert.Contains("DRM", message);
         Assert.Contains("不支援", message);
+    }
+
+    [Fact]
+    public void Map_explains_the_YouTube_403_stream_data_fallback()
+    {
+        var message = UserFacingErrorMapper.Map("ERROR: unable to download video data: HTTP Error 403: Forbidden");
+
+        Assert.Contains("YouTube", message);
+        Assert.Contains("nightly", message);
+        Assert.Contains("Deno", message);
+        Assert.Contains("IPv4", message);
+        Assert.DoesNotContain("VPN", message);
     }
 }

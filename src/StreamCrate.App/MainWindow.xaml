@@ -117,10 +117,10 @@
                                     <StackPanel x:Name="OptionsPanel" Orientation="Horizontal" Spacing="12">
                                         <ComboBox x:Name="CookieBox" Header="登入方式" SelectedIndex="0" Width="230">
                                             <ComboBoxItem Content="不使用 Cookie" Tag="none" />
-                                            <ComboBoxItem Content="Chrome" Tag="chrome" />
-                                            <ComboBoxItem Content="Edge" Tag="edge" />
+                                            <ComboBoxItem Content="Chrome（Windows 可能無法解密）" Tag="chrome" />
+                                            <ComboBoxItem Content="Edge（Windows 可能無法解密）" Tag="edge" />
                                             <ComboBoxItem Content="Firefox" Tag="firefox" />
-                                            <ComboBoxItem Content="cookies.txt（選取檔案）" Tag="file" />
+                                            <ComboBoxItem Content="cookies.txt（瀏覽器匯出的 Netscape 檔）" Tag="file" />
                                         </ComboBox>
                                         <ComboBox x:Name="FormatBox" Header="格式" SelectedIndex="0" Width="160">
                                             <ComboBoxItem Content="MP4" />

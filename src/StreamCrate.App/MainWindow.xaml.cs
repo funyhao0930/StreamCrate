@@ -312,7 +312,16 @@ public sealed partial class MainWindow : Window
     private async Task ExecuteDownloadAsync(DownloadJob job, IProgress<DownloadProgress> progress, CancellationToken cancellationToken)
     {
         var specification = new YtDlpCommandFactory().CreateDownload(job.Request, Path.GetDirectoryName(_toolchain.FfmpegPath)!);
-        await new YtDlpProcessRunner().RunAsync(specification with { ExecutablePath = _toolchain.YtDlpPath }, progress, cancellationToken);
+        var runner = new YtDlpProcessRunner();
+        var executableSpecification = specification with { ExecutablePath = _toolchain.YtDlpPath };
+        try
+        {
+            await runner.RunAsync(executableSpecification, progress, cancellationToken);
+        }
+        catch (InvalidOperationException exception) when (YouTube403RetryPolicy.ShouldRetry(job.Request.Media.Extractor, exception.Message))
+        {
+            await runner.RunAsync(YouTube403RetryPolicy.WithForceIpv4(executableSpecification), progress, cancellationToken);
+        }
     }
 
     private void QueueJobChanged(object? sender, DownloadJob job) => DispatcherQueue.TryEnqueue(() => _ = HandleQueueJobChangedAsync(job));

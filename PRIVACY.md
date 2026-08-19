@@ -17,7 +17,7 @@ StreamCrate 是本機 Windows 應用程式，沒有遙測、帳號系統、廣�
 程式只會為下列目的連線：
 
 - 你要求的媒體資訊解析與下載。
-- 首次準備或更新 yt-dlp 與 FFmpeg，且先驗證官方釋出的 SHA-256。
+- 首次準備或更新 yt-dlp、Deno 與 FFmpeg，且先驗證官方釋出的 SHA-256。
 - 每 24 小時一次的 GitHub Release 更新檢查；本機沒有設定 `GITHUB_REPOSITORY` 時，此功能停用。
 
 除上述情況外，程式不會將使用資料傳送給 StreamCrate 開發者。

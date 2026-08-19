@@ -4,7 +4,8 @@ StreamCrate 的原始碼採 MIT License；應用程式可能依使用情境下�
 
 | 元件 | 用途 | 授權與來源 |
 | --- | --- | --- |
-| yt-dlp | 媒體資訊解析與下載 | [Unlicense](https://github.com/yt-dlp/yt-dlp/blob/master/LICENSE)；[官方 Releases](https://github.com/yt-dlp/yt-dlp/releases) |
+| yt-dlp nightly | 媒體資訊解析與下載 | [Unlicense](https://github.com/yt-dlp/yt-dlp/blob/master/LICENSE)；[官方 Nightly Builds](https://github.com/yt-dlp/yt-dlp-nightly-builds/releases) |
+| Deno | 執行 yt-dlp 的 YouTube JavaScript challenge solver | [MIT License](https://github.com/denoland/deno/blob/main/LICENSE.md)；[官方 Releases](https://github.com/denoland/deno/releases) |
 | FFmpeg（win64 LGPL static build） | 音訊／視訊合併與轉檔 | [LGPL v2.1 or later](https://ffmpeg.org/legal.html)；[BtbN builds](https://github.com/BtbN/FFmpeg-Builds) |
 | Windows App SDK / WinUI 3 | Windows 桌面介面 | [MIT License](https://github.com/microsoft/WindowsAppSDK/blob/main/LICENSE) |
 | CommunityToolkit.Mvvm | MVVM 支援 | [MIT License](https://github.com/CommunityToolkit/dotnet/blob/main/License.md) |
@@ -17,4 +18,4 @@ StreamCrate 只選擇 BtbN Release 中的 `win64-lgpl` static 資產，排除 `m
 
 ## 取得原始碼
 
-第三方元件的原始碼、授權文本與更新版本，請由上表連結取得。StreamCrate 不修改 yt-dlp 或 FFmpeg 的原始碼。
+第三方元件的原始碼、授權文本與更新版本，請由上表連結取得。StreamCrate 不修改 yt-dlp、Deno 或 FFmpeg 的原始碼。
