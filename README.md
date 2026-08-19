@@ -11,7 +11,7 @@ StreamCrate 是一個為 Windows 10 22H2 與 Windows 11 x64 設計的本機優�
 - MP4（最佳、2160p、1440p、1080p、720p）與高品質 MP3
 - 一次一項的 FIFO 下載、取消、失敗重試與 `.part` 續傳
 - Chrome、Edge、Firefox Cookie 匯入，或僅限本次使用的 Netscape `cookies.txt`
-- 繁體中文／English、系統／淺色／深色主題
+- 繁體中文／English、淺色／深色主題
 - 無遙測；Cookie、授權標頭與可能含 token 的 URL 查詢字串不會寫入歷史或日誌
 
 ## 安裝與使用
