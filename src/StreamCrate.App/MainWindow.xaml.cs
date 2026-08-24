@@ -23,7 +23,10 @@ public sealed partial class MainWindow : Window
     private readonly DownloadQueueService _queue;
     private readonly IHistoryStore _history;
     private readonly IAppSettingsStore _settingsStore;
-    private readonly ObservableCollection<QueueItem> _queueItems = [];
+    private readonly ObservableCollection<QueueItem> _inProgressQueueItems = [];
+    private readonly ObservableCollection<QueueItem> _completedQueueItems = [];
+    private readonly ObservableCollection<QueueItem> _failedQueueItems = [];
+    private readonly Dictionary<Guid, QueueItem> _queueItemsById = [];
     private readonly ObservableCollection<HistoryItem> _historyItems = [];
     private readonly HashSet<Guid> _storedHistoryIds = [];
     private AppSettings _settings = AppSettings.CreateDefault();
@@ -47,7 +50,9 @@ public sealed partial class MainWindow : Window
         _history = new SqliteHistoryStore(Path.Combine(dataDirectory, "history.db"));
         _queue = new DownloadQueueService(ExecuteDownloadAsync);
         _queue.JobChanged += QueueJobChanged;
-        QueueList.ItemsSource = _queueItems;
+        InProgressQueueList.ItemsSource = _inProgressQueueItems;
+        CompletedQueueList.ItemsSource = _completedQueueItems;
+        FailedQueueList.ItemsSource = _failedQueueItems;
         HistoryList.ItemsSource = _historyItems;
     }
 
@@ -442,13 +447,33 @@ public sealed partial class MainWindow : Window
 
     private void RenderQueue()
     {
-        _queueItems.Clear();
-        foreach (var job in _queue.GetSnapshot())
+        var jobs = _queue.GetSnapshot();
+        var activeIds = jobs.Select(job => job.Id).ToHashSet();
+        foreach (var removedId in _queueItemsById.Keys.Where(id => !activeIds.Contains(id)).ToArray())
         {
-            _queueItems.Add(new QueueItem(job));
+            _queueItemsById.Remove(removedId);
         }
 
-        QueueEmptyState.Visibility = _queueItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        foreach (var job in jobs)
+        {
+            if (_queueItemsById.TryGetValue(job.Id, out var item))
+            {
+                item.Update(job);
+            }
+            else
+            {
+                _queueItemsById[job.Id] = new QueueItem(job);
+            }
+        }
+
+        QueueSectionSynchronizer.Synchronize(_inProgressQueueItems, jobs.Where(job => QueueItem.GetSection(job.State) == "InProgress").Select(job => _queueItemsById[job.Id]));
+        QueueSectionSynchronizer.Synchronize(_completedQueueItems, jobs.Where(job => QueueItem.GetSection(job.State) == "Completed").Select(job => _queueItemsById[job.Id]));
+        QueueSectionSynchronizer.Synchronize(_failedQueueItems, jobs.Where(job => QueueItem.GetSection(job.State) == "Failed").Select(job => _queueItemsById[job.Id]));
+
+        QueueEmptyState.Visibility = jobs.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        InProgressQueueSection.Visibility = _inProgressQueueItems.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        CompletedQueueSection.Visibility = _completedQueueItems.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        FailedQueueSection.Visibility = _failedQueueItems.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private async Task RenderHistoryAsync()
@@ -494,7 +519,36 @@ public sealed partial class MainWindow : Window
     {
         if ((sender as FrameworkElement)?.Tag is string outputPath)
         {
-            await Windows.System.Launcher.LaunchFolderPathAsync(outputPath);
+            await OpenFolderAsync(outputPath);
+        }
+    }
+
+    private async void OpenQueueFolderClicked(object sender, RoutedEventArgs args)
+    {
+        if ((sender as FrameworkElement)?.Tag is string outputPath)
+        {
+            await OpenFolderAsync(outputPath);
+        }
+    }
+
+    private async Task OpenFolderAsync(string outputPath)
+    {
+        if (!Directory.Exists(outputPath) || !await Windows.System.Launcher.LaunchFolderPathAsync(outputPath))
+        {
+            ShowError("無法開啟檔案位置", "輸出資料夾不存在或 Windows 無法開啟它。");
+        }
+    }
+
+    private async void ChooseDownloadFolderClicked(object sender, RoutedEventArgs args)
+    {
+        var picker = new FolderPicker();
+        picker.FileTypeFilter.Add("*");
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(this));
+        var folder = await picker.PickSingleFolderAsync();
+        if (folder is not null)
+        {
+            DownloadFolderBox.Text = folder.Path;
+            SettingsMessage.Text = "資料夾已選擇，請儲存設定後套用。";
         }
     }
 
@@ -573,48 +627,39 @@ public sealed partial class MainWindow : Window
 
     private void AnimateItemContainers(string? tag, int delay)
     {
-        var list = tag switch
+        foreach (var list in GetAnimatedItemLists(tag))
         {
-            "queue" => QueueList,
-            "history" => HistoryList,
-            _ => null,
-        };
-        if (list is null)
-        {
-            return;
-        }
-
-        foreach (var item in list.Items)
-        {
-            if (list.ContainerFromItem(item) is UIElement container)
+            foreach (var item in list.Items)
             {
-                AnimateSlideUp(container, TimeSpan.FromMilliseconds(delay));
-                delay += 55;
+                if (list.ContainerFromItem(item) is UIElement container)
+                {
+                    AnimateSlideUp(container, TimeSpan.FromMilliseconds(delay));
+                    delay += 55;
+                }
             }
         }
     }
 
     private void SetItemContainersImmediatelyVisible(string? tag)
     {
-        var list = tag switch
+        foreach (var list in GetAnimatedItemLists(tag))
         {
-            "queue" => QueueList,
-            "history" => HistoryList,
-            _ => null,
-        };
-        if (list is null)
-        {
-            return;
-        }
-
-        foreach (var item in list.Items)
-        {
-            if (list.ContainerFromItem(item) is UIElement container)
+            foreach (var item in list.Items)
             {
-                SetImmediatelyVisible(container);
+                if (list.ContainerFromItem(item) is UIElement container)
+                {
+                    SetImmediatelyVisible(container);
+                }
             }
         }
     }
+
+    private IReadOnlyList<ItemsControl> GetAnimatedItemLists(string? tag) => tag switch
+    {
+        "queue" => [InProgressQueueList, CompletedQueueList, FailedQueueList],
+        "history" => [HistoryList],
+        _ => [],
+    };
 
     private static void AnimateOpacity(UIElement element, TimeSpan delay)
     {

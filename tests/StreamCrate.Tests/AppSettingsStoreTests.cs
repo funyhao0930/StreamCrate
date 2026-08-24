@@ -12,8 +12,9 @@ public sealed class AppSettingsStoreTests : IDisposable
     public async Task Save_then_load_preserves_download_and_theme_preferences()
     {
         var path = Path.Combine(_directory, "settings.json");
+        Directory.CreateDirectory(_directory);
         var expected = new AppSettings(
-            @"D:\Media",
+            _directory,
             DownloadFormat.Mp3,
             VideoQuality.P720,
             AppTheme.Light,
@@ -66,6 +67,17 @@ public sealed class AppSettingsStoreTests : IDisposable
         var resolvedPath = BackgroundImagePathResolver.Resolve(Path.Combine(_directory, fileName));
 
         Assert.Null(resolvedPath);
+    }
+
+    [Fact]
+    public async Task Save_rejects_a_download_directory_that_no_longer_exists()
+    {
+        var path = Path.Combine(_directory, "settings.json");
+        var settings = new AppSettings(Path.Combine(_directory, "missing"), DownloadFormat.Mp4, VideoQuality.Best, AppTheme.Dark);
+
+        await Assert.ThrowsAsync<DirectoryNotFoundException>(() => new JsonAppSettingsStore(path).SaveAsync(settings));
+
+        Assert.False(File.Exists(path));
     }
 
     public void Dispose()

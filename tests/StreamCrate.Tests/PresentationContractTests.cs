@@ -100,6 +100,87 @@ public sealed class PresentationContractTests
         Assert.Single(fallback.Arguments, argument => argument == "--force-ipv4");
     }
 
+    [Theory]
+    [InlineData(DownloadJobState.Queued, "InProgress")]
+    [InlineData(DownloadJobState.Probing, "InProgress")]
+    [InlineData(DownloadJobState.Downloading, "InProgress")]
+    [InlineData(DownloadJobState.PostProcessing, "InProgress")]
+    [InlineData(DownloadJobState.Cancelled, "InProgress")]
+    [InlineData(DownloadJobState.SkippedExisting, "InProgress")]
+    [InlineData(DownloadJobState.Completed, "Completed")]
+    [InlineData(DownloadJobState.Failed, "Failed")]
+    public void Queue_item_places_each_download_state_in_its_expected_section(DownloadJobState state, string expectedSection)
+    {
+        var job = CreateJob(state);
+
+        var item = CreateQueueItem(job);
+
+        Assert.Equal(expectedSection, GetQueueItemProperty<string>(item, "Section"));
+    }
+
+    [Fact]
+    public void Completed_queue_item_exposes_its_output_folder_for_open_location_action()
+    {
+        var job = CreateJob(DownloadJobState.Completed);
+
+        var item = CreateQueueItem(job);
+
+        Assert.Equal(@"D:\Media", GetQueueItemProperty<string>(item, "OutputPath"));
+    }
+
+    [Fact]
+    public void Failed_queue_item_exposes_a_visible_safe_failure_message()
+    {
+        const string rawFailure = "ERROR: DRM protected content, token=private-value";
+        var job = CreateJob(DownloadJobState.Failed, rawFailure);
+
+        var item = CreateQueueItem(job);
+
+        var message = GetQueueItemProperty<string>(item, "ErrorMessage");
+        Assert.Contains("DRM", message);
+        Assert.DoesNotContain(rawFailure, message);
+        Assert.DoesNotContain("private-value", message);
+    }
+
+    [Fact]
+    public void Queue_view_defines_separate_status_sections_with_motion_and_status_actions()
+    {
+        var xaml = File.ReadAllText(FindRepositoryFile("src", "StreamCrate.App", "MainWindow.xaml"));
+
+        Assert.Contains("x:Name=\"InProgressQueueSection\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"CompletedQueueSection\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"FailedQueueSection\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("RepositionThemeTransition", xaml, StringComparison.Ordinal);
+        Assert.Contains("開啟檔案位置", xaml, StringComparison.Ordinal);
+        Assert.Contains("Tag=\"{Binding OutputPath}\" Click=\"OpenQueueFolderClicked\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("✖", xaml, StringComparison.Ordinal);
+        Assert.Contains("#33FF4D4F", xaml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Queue_section_synchronizer_preserves_instances_and_reorders_to_snapshot_order()
+    {
+        var first = CreateQueueItem(CreateJob(DownloadJobState.Queued));
+        var second = CreateQueueItem(CreateJob(DownloadJobState.Completed));
+        var queueItemType = first.GetType();
+        var collectionType = typeof(System.Collections.ObjectModel.ObservableCollection<>).MakeGenericType(queueItemType);
+        var items = Assert.IsAssignableFrom<System.Collections.IList>(Activator.CreateInstance(collectionType));
+        items.Add(first);
+        items.Add(second);
+        var expectedItems = Array.CreateInstance(queueItemType, 2);
+        expectedItems.SetValue(second, 0);
+        expectedItems.SetValue(first, 1);
+
+        var synchronizerType = typeof(MainWindow).Assembly.GetType("StreamCrate.App.Presentation.QueueSectionSynchronizer");
+        Assert.NotNull(synchronizerType);
+        var synchronize = synchronizerType.GetMethod("Synchronize", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        Assert.NotNull(synchronize);
+        synchronize.Invoke(null, [items, expectedItems]);
+
+        Assert.Same(second, items[0]);
+        Assert.Same(first, items[1]);
+    }
+
     private static IReadOnlyList<DownloadRequest> InvokePlaylistBuilder(
         IReadOnlyList<MediaItem> items,
         IReadOnlyList<bool> selected,
@@ -120,5 +201,56 @@ public sealed class PresentationContractTests
         var method = type.GetMethod("Get", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         Assert.NotNull(method);
         return Assert.IsType<string>(method.Invoke(null, [state]));
+    }
+
+    private static DownloadJob CreateJob(DownloadJobState state, string? failureMessage = null)
+    {
+        var request = new DownloadRequest(
+            new MediaItem("test", "queue-item", "Queue item", new Uri("https://example.test/queue-item"), null),
+            @"D:\Media",
+            DownloadFormat.Mp4,
+            VideoQuality.Best,
+            CookieSelection.None);
+        var job = new DownloadJob(request);
+        if (state == DownloadJobState.Failed)
+        {
+            job.SetFailure(failureMessage ?? "下載工具錯誤", "下載工具錯誤");
+        }
+        else
+        {
+            job.SetState(state);
+        }
+
+        return job;
+    }
+
+    private static object CreateQueueItem(DownloadJob job)
+    {
+        var type = typeof(MainWindow).Assembly.GetType("StreamCrate.App.Presentation.QueueItem");
+        Assert.NotNull(type);
+        var item = Activator.CreateInstance(type, job);
+        Assert.NotNull(item);
+        return item;
+    }
+
+    private static T GetQueueItemProperty<T>(object item, string propertyName)
+    {
+        var property = item.GetType().GetProperty(propertyName);
+        Assert.NotNull(property);
+        return Assert.IsType<T>(property.GetValue(item));
+    }
+
+    private static string FindRepositoryFile(params string[] segments)
+    {
+        for (var directory = new DirectoryInfo(Directory.GetCurrentDirectory()); directory is not null; directory = directory.Parent)
+        {
+            var candidate = Path.Combine([directory.FullName, .. segments]);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        throw new FileNotFoundException("找不到工作區檔案。", Path.Combine(segments));
     }
 }

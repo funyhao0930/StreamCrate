@@ -29,6 +29,11 @@ public sealed class JsonAppSettingsStore(string path) : IAppSettingsStore
     public async Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(settings.DownloadDirectory);
+        if (!Directory.Exists(settings.DownloadDirectory))
+        {
+            throw new DirectoryNotFoundException($"下載資料夾不存在：{settings.DownloadDirectory}");
+        }
+
         var directory = Path.GetDirectoryName(path) ?? throw new InvalidOperationException("設定檔路徑無效。");
         Directory.CreateDirectory(directory);
         var temporaryPath = path + ".tmp";
