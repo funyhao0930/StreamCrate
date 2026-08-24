@@ -30,8 +30,13 @@
 
             <Grid Padding="32" MaxWidth="960" HorizontalAlignment="Stretch">
                 <Grid.Resources>
-                    <DataTemplate x:Key="QueueItemTemplate">
+                    <DataTemplate x:Key="InProgressQueueItemTemplate">
                         <Border Style="{StaticResource CardBorderStyle}" Margin="0,0,0,12">
+                            <Border.Transitions>
+                                <TransitionCollection>
+                                    <EntranceThemeTransition FromVerticalOffset="16" />
+                                </TransitionCollection>
+                            </Border.Transitions>
                             <StackPanel Spacing="8">
                                 <Grid ColumnSpacing="12">
                                     <Grid.ColumnDefinitions>
@@ -46,7 +51,56 @@
                                 </Grid>
                                 <ProgressBar Value="{Binding ProgressPercent}" Maximum="100" Visibility="{Binding ProgressVisibility}" />
                                 <TextBlock Text="{Binding ProgressDetails}" Visibility="{Binding ProgressDetailsVisibility}" FontFamily="Cascadia Mono" FontSize="11" Foreground="{ThemeResource AppMutedTextBrush}" />
-                                <TextBlock Text="{Binding ErrorMessage}" Visibility="{Binding ErrorVisibility}" TextWrapping="Wrap" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                    <DataTemplate x:Key="CompletedQueueItemTemplate">
+                        <Border Style="{StaticResource CardBorderStyle}" Margin="0,0,0,12">
+                            <Border.Transitions>
+                                <TransitionCollection>
+                                    <EntranceThemeTransition FromVerticalOffset="16" />
+                                </TransitionCollection>
+                            </Border.Transitions>
+                            <Grid ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="3">
+                                    <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Details}" Foreground="{ThemeResource AppMutedTextBrush}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="8" HorizontalAlignment="Right">
+                                    <Border Width="30" Height="30" CornerRadius="15" Background="{ThemeResource AppSuccessBrush}" HorizontalAlignment="Right">
+                                        <TextBlock Text="✔" Foreground="Black" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <Button Content="開啟檔案位置" Tag="{Binding OutputPath}" Click="OpenQueueFolderClicked" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                    <DataTemplate x:Key="FailedQueueItemTemplate">
+                        <Border Style="{StaticResource CardBorderStyle}" Margin="0,0,0,12">
+                            <Border.Transitions>
+                                <TransitionCollection>
+                                    <EntranceThemeTransition FromVerticalOffset="16" />
+                                </TransitionCollection>
+                            </Border.Transitions>
+                            <StackPanel Spacing="12">
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="3">
+                                        <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Details}" Foreground="{ThemeResource AppMutedTextBrush}" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="✖" FontSize="22" Foreground="{ThemeResource SystemFillColorCriticalBrush}" VerticalAlignment="Top" />
+                                </Grid>
+                                <Border Background="#33FF4D4F" CornerRadius="8" Padding="12">
+                                    <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                </Border>
                             </StackPanel>
                         </Border>
                     </DataTemplate>
@@ -210,14 +264,61 @@
                         <TextBlock Text="一次一筆，清楚掌握每個工作目前的位置。" Style="{StaticResource PageSubtitleTextBlockStyle}" />
                     </StackPanel>
                     <ScrollViewer Grid.Row="1" Padding="0,8,0,24">
-                        <StackPanel>
+                        <StackPanel Spacing="12">
                             <Border x:Name="QueueEmptyState" Style="{StaticResource DockBorderStyle}">
                                 <StackPanel Spacing="6">
                                     <TextBlock Text="目前沒有下載工作" FontSize="17" FontWeight="SemiBold" />
                                     <TextBlock Text="解析一個網址後，就能把影片或播放清單加入這裡。" Style="{StaticResource PageSubtitleTextBlockStyle}" />
                                 </StackPanel>
                             </Border>
-                            <ItemsControl x:Name="QueueList" ItemTemplate="{StaticResource QueueItemTemplate}" />
+                            <StackPanel x:Name="InProgressQueueSection" Spacing="4">
+                                <TextBlock Text="下載中" Style="{StaticResource SectionLabelTextBlockStyle}" />
+                                <ItemsControl x:Name="InProgressQueueList" ItemTemplate="{StaticResource InProgressQueueItemTemplate}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <ItemsStackPanel>
+                                                <ItemsStackPanel.ChildrenTransitions>
+                                                    <TransitionCollection>
+                                                        <RepositionThemeTransition />
+                                                    </TransitionCollection>
+                                                </ItemsStackPanel.ChildrenTransitions>
+                                            </ItemsStackPanel>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                            <StackPanel x:Name="CompletedQueueSection" Spacing="4">
+                                <TextBlock Text="下載完成" Style="{StaticResource SectionLabelTextBlockStyle}" />
+                                <ItemsControl x:Name="CompletedQueueList" ItemTemplate="{StaticResource CompletedQueueItemTemplate}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <ItemsStackPanel>
+                                                <ItemsStackPanel.ChildrenTransitions>
+                                                    <TransitionCollection>
+                                                        <RepositionThemeTransition />
+                                                    </TransitionCollection>
+                                                </ItemsStackPanel.ChildrenTransitions>
+                                            </ItemsStackPanel>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                            <StackPanel x:Name="FailedQueueSection" Spacing="4">
+                                <TextBlock Text="下載失敗" Style="{StaticResource SectionLabelTextBlockStyle}" />
+                                <ItemsControl x:Name="FailedQueueList" ItemTemplate="{StaticResource FailedQueueItemTemplate}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <ItemsStackPanel>
+                                                <ItemsStackPanel.ChildrenTransitions>
+                                                    <TransitionCollection>
+                                                        <RepositionThemeTransition />
+                                                    </TransitionCollection>
+                                                </ItemsStackPanel.ChildrenTransitions>
+                                            </ItemsStackPanel>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>

@@ -1,15 +1,91 @@
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml;
 using StreamCrate.Core.Models;
 using StreamCrate.Infrastructure.Diagnostics;
 
 namespace StreamCrate.App.Presentation;
 
-internal sealed class QueueItem
+internal sealed class QueueItem : ObservableObject
 {
     public QueueItem(DownloadJob job)
     {
         Id = job.Id;
         Title = job.Request.Media.Title;
+        OutputPath = job.Request.OutputDirectory;
+        Update(job);
+    }
+
+    public Guid Id { get; }
+    public string Title { get; }
+    public string OutputPath { get; }
+
+    private string _section = string.Empty;
+    public string Section
+    {
+        get => _section;
+        private set => SetProperty(ref _section, value);
+    }
+
+    private string _state = string.Empty;
+    public string State
+    {
+        get => _state;
+        private set => SetProperty(ref _state, value);
+    }
+
+    private string _details = string.Empty;
+    public string Details
+    {
+        get => _details;
+        private set => SetProperty(ref _details, value);
+    }
+
+    private double _progressPercent;
+    public double ProgressPercent
+    {
+        get => _progressPercent;
+        private set => SetProperty(ref _progressPercent, value);
+    }
+
+    private string _progressDetails = string.Empty;
+    public string ProgressDetails
+    {
+        get => _progressDetails;
+        private set => SetProperty(ref _progressDetails, value);
+    }
+
+    private Visibility _progressVisibility;
+    public Visibility ProgressVisibility
+    {
+        get => _progressVisibility;
+        private set => SetProperty(ref _progressVisibility, value);
+    }
+
+    private Visibility _progressDetailsVisibility;
+    public Visibility ProgressDetailsVisibility
+    {
+        get => _progressDetailsVisibility;
+        private set => SetProperty(ref _progressDetailsVisibility, value);
+    }
+
+    private string _errorMessage = string.Empty;
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        private set => SetProperty(ref _errorMessage, value);
+    }
+
+    private Visibility _cancelVisibility;
+    public Visibility CancelVisibility
+    {
+        get => _cancelVisibility;
+        private set => SetProperty(ref _cancelVisibility, value);
+    }
+
+    public void Update(DownloadJob job)
+    {
+        Section = GetSection(job.State);
         State = DownloadStateText.Get(job.State);
         Details = $"{State} · {FormatText(job.Request.Format)} · {QualityText(job.Request.Quality)}";
         ProgressPercent = job.Progress?.Percent ?? 0;
@@ -17,21 +93,15 @@ internal sealed class QueueItem
         ProgressVisibility = job.Progress?.Percent is null ? Visibility.Collapsed : Visibility.Visible;
         ProgressDetailsVisibility = string.IsNullOrWhiteSpace(ProgressDetails) ? Visibility.Collapsed : Visibility.Visible;
         ErrorMessage = job.ErrorMessage is null ? string.Empty : UserFacingErrorMapper.Map(job.ErrorMessage);
-        ErrorVisibility = string.IsNullOrWhiteSpace(ErrorMessage) ? Visibility.Collapsed : Visibility.Visible;
         CancelVisibility = job.State is DownloadJobState.Queued or DownloadJobState.Downloading ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    public Guid Id { get; }
-    public string Title { get; }
-    public string State { get; }
-    public string Details { get; }
-    public double ProgressPercent { get; }
-    public string ProgressDetails { get; }
-    public Visibility ProgressVisibility { get; }
-    public Visibility ProgressDetailsVisibility { get; }
-    public string ErrorMessage { get; }
-    public Visibility ErrorVisibility { get; }
-    public Visibility CancelVisibility { get; }
+    public static string GetSection(DownloadJobState state) => state switch
+    {
+        DownloadJobState.Completed => "Completed",
+        DownloadJobState.Failed => "Failed",
+        _ => "InProgress",
+    };
 
     private static string BuildProgressDetails(DownloadProgress? progress)
     {
@@ -59,6 +129,37 @@ internal sealed class QueueItem
         VideoQuality.P720 => "720p",
         _ => quality.ToString(),
     };
+}
+
+internal static class QueueSectionSynchronizer
+{
+    public static void Synchronize(ObservableCollection<QueueItem> items, IEnumerable<QueueItem> expectedItems)
+    {
+        var expected = expectedItems.ToArray();
+        foreach (var staleItem in items.Where(item => !expected.Contains(item)).ToArray())
+        {
+            items.Remove(staleItem);
+        }
+
+        for (var index = 0; index < expected.Length; index++)
+        {
+            var item = expected[index];
+            if (index < items.Count && items[index] == item)
+            {
+                continue;
+            }
+
+            var existingIndex = items.IndexOf(item);
+            if (existingIndex >= 0)
+            {
+                items.Move(existingIndex, index);
+            }
+            else
+            {
+                items.Insert(index, item);
+            }
+        }
+    }
 }
 
 internal sealed class HistoryItem
