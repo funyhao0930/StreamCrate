@@ -3,10 +3,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
-            <SolidColorBrush x:Key="AppCanvasBrush" Color="#F5F7F9" />
-            <SolidColorBrush x:Key="AppNavigationBrush" Color="#EDF1F4" />
-            <SolidColorBrush x:Key="AppSurfaceBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="AppSurfaceSubtleBrush" Color="#F0F4F7" />
+            <SolidColorBrush x:Key="AppCanvasBrush" Color="#A3F5F7F9" />
+            <SolidColorBrush x:Key="AppNavigationBrush" Color="#D9EDF1F4" />
+            <SolidColorBrush x:Key="AppSurfaceBrush" Color="#E8FFFFFF" />
+            <SolidColorBrush x:Key="AppSurfaceSubtleBrush" Color="#DDF0F4F7" />
             <SolidColorBrush x:Key="AppBorderBrush" Color="#D7E0E8" />
             <SolidColorBrush x:Key="AppPrimaryBrush" Color="#376FBD" />
             <SolidColorBrush x:Key="AppTextBrush" Color="#18232E" />
@@ -14,10 +14,10 @@
             <SolidColorBrush x:Key="AppSuccessBrush" Color="#3E8B68" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
-            <SolidColorBrush x:Key="AppCanvasBrush" Color="#111820" />
-            <SolidColorBrush x:Key="AppNavigationBrush" Color="#171F28" />
-            <SolidColorBrush x:Key="AppSurfaceBrush" Color="#1B2530" />
-            <SolidColorBrush x:Key="AppSurfaceSubtleBrush" Color="#202C38" />
+            <SolidColorBrush x:Key="AppCanvasBrush" Color="#A3111820" />
+            <SolidColorBrush x:Key="AppNavigationBrush" Color="#D9171F28" />
+            <SolidColorBrush x:Key="AppSurfaceBrush" Color="#E81B2530" />
+            <SolidColorBrush x:Key="AppSurfaceSubtleBrush" Color="#DD202C38" />
             <SolidColorBrush x:Key="AppBorderBrush" Color="#35414C" />
             <SolidColorBrush x:Key="AppPrimaryBrush" Color="#6F9FDD" />
             <SolidColorBrush x:Key="AppTextBrush" Color="#EDF4FA" />
@@ -29,6 +29,12 @@
     <Style x:Key="PageTitleTextBlockStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="Segoe UI Variable Display" />
         <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{ThemeResource AppTextBrush}" />
+    </Style>
+    <Style x:Key="AppTitleTextBlockStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Segoe UI Variable Display" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{ThemeResource AppTextBrush}" />
     </Style>

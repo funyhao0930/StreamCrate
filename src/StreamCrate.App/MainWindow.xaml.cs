@@ -1,6 +1,10 @@
 using System.Collections.ObjectModel;
+using System.Numerics;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Media.Imaging;
 using StreamCrate.App.Presentation;
 using StreamCrate.Core.Models;
 using StreamCrate.Infrastructure.Diagnostics;
@@ -9,6 +13,7 @@ using StreamCrate.Infrastructure.Queue;
 using StreamCrate.Infrastructure.Storage;
 using StreamCrate.Infrastructure.Tooling;
 using Windows.Storage.Pickers;
+using Windows.UI.ViewManagement;
 
 namespace StreamCrate.App;
 
@@ -28,10 +33,14 @@ public sealed partial class MainWindow : Window
     private MediaItem? _probedMedia;
     private PlaylistSelection? _playlistSelection;
     private CookieSelection _probedCookies = CookieSelection.None;
+    private readonly UISettings _uiSettings = new();
+    private string? _backgroundImagePath;
 
     public MainWindow()
     {
         InitializeComponent();
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(AppTitleBar);
         AppWindow.Resize(new Windows.Graphics.SizeInt32(1100, 760));
         var dataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StreamCrate");
         _settingsStore = new JsonAppSettingsStore(Path.Combine(dataDirectory, "settings.json"));
@@ -94,17 +103,17 @@ public sealed partial class MainWindow : Window
 
     private async void RetryToolsClicked(object sender, RoutedEventArgs args) => await EnsureToolsAsync();
 
-    private void NavigationSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    private async void NavigationSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (args.SelectedItem is not NavigationViewItem item)
         {
             return;
         }
 
-        ShowPanel(item.Tag?.ToString());
+        await ShowPanelAsync(item.Tag?.ToString());
     }
 
-    private void ShowPanel(string? tag)
+    private async Task ShowPanelAsync(string? tag)
     {
         DownloadPanel.Visibility = tag == "download" ? Visibility.Visible : Visibility.Collapsed;
         QueuePanel.Visibility = tag == "queue" ? Visibility.Visible : Visibility.Collapsed;
@@ -116,8 +125,10 @@ public sealed partial class MainWindow : Window
         }
         else if (tag == "history")
         {
-            _ = RenderHistoryAsync();
+            await RenderHistoryAsync();
         }
+
+        await PlayPageEntranceAsync(tag);
     }
 
     private async void ProbeClicked(object sender, RoutedEventArgs args)
@@ -254,8 +265,13 @@ public sealed partial class MainWindow : Window
 
     private void ViewQueueClicked(object sender, RoutedEventArgs args)
     {
+        if (ReferenceEquals(RootNavigation.SelectedItem, QueueNavigationItem))
+        {
+            _ = ShowPanelAsync("queue");
+            return;
+        }
+
         RootNavigation.SelectedItem = QueueNavigationItem;
-        ShowPanel("queue");
     }
 
     private void UrlTextChanged(object sender, TextChangedEventArgs args)
@@ -307,6 +323,67 @@ public sealed partial class MainWindow : Window
         }
 
         return new CookieSelection(CookieSource.CookiesFile, file.Path);
+    }
+
+    private async void ChooseBackgroundImageClicked(object sender, RoutedEventArgs args)
+    {
+        var picker = new FileOpenPicker();
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(this));
+        picker.FileTypeFilter.Add(".bmp");
+        picker.FileTypeFilter.Add(".jpeg");
+        picker.FileTypeFilter.Add(".jpg");
+        picker.FileTypeFilter.Add(".png");
+        picker.FileTypeFilter.Add(".webp");
+        var file = await picker.PickSingleFileAsync();
+        if (file is null)
+        {
+            return;
+        }
+
+        _backgroundImagePath = file.Path;
+        ApplyBackgroundImage(_backgroundImagePath);
+        SettingsMessage.Text = "背景圖片已預覽；按「儲存設定」後會保留這項偏好。";
+    }
+
+    private void ClearBackgroundImageClicked(object sender, RoutedEventArgs args)
+    {
+        _backgroundImagePath = null;
+        ApplyBackgroundImage(null);
+        SettingsMessage.Text = "背景圖片已清除預覽；按「儲存設定」後會保留這項偏好。";
+    }
+
+    private void ApplyBackgroundImage(string? path)
+    {
+        var resolvedPath = BackgroundImagePathResolver.Resolve(path);
+        if (resolvedPath is null)
+        {
+            BackgroundImage.Source = null;
+            BackgroundImage.Visibility = Visibility.Collapsed;
+            BackgroundImagePathText.Text = string.IsNullOrWhiteSpace(path)
+                ? "未使用自訂背景。"
+                : "背景圖片目前無法使用，已改用主題背景。";
+            return;
+        }
+
+        try
+        {
+            BackgroundImage.Source = new BitmapImage(new Uri(resolvedPath));
+            BackgroundImage.Visibility = Visibility.Visible;
+            BackgroundImagePathText.Text = $"目前背景：{Path.GetFileName(resolvedPath)}";
+        }
+        catch (Exception)
+        {
+            BackgroundImage.Source = null;
+            BackgroundImage.Visibility = Visibility.Collapsed;
+            BackgroundImagePathText.Text = "背景圖片目前無法使用，已改用主題背景。";
+        }
+    }
+
+    private void BackgroundImageFailed(object sender, ExceptionRoutedEventArgs args)
+    {
+        BackgroundImage.Source = null;
+        BackgroundImage.Visibility = Visibility.Collapsed;
+        BackgroundImagePathText.Text = "背景圖片無法載入，已改用主題背景。";
     }
 
     private async Task ExecuteDownloadAsync(DownloadJob job, IProgress<DownloadProgress> progress, CancellationToken cancellationToken)
@@ -434,7 +511,8 @@ public sealed partial class MainWindow : Window
             directory,
             DefaultFormatBox.SelectedIndex == 1 ? DownloadFormat.Mp3 : DownloadFormat.Mp4,
             (VideoQuality)Math.Max(DefaultQualityBox.SelectedIndex, 0),
-            ThemeBox.SelectedIndex == 1 ? AppTheme.Light : AppTheme.Dark);
+            ThemeBox.SelectedIndex == 1 ? AppTheme.Light : AppTheme.Dark,
+            _backgroundImagePath);
         await _settingsStore.SaveAsync(_settings);
         ApplySettings();
         SettingsMessage.Text = "設定已保存，之後的下載會使用新預設。";
@@ -449,6 +527,137 @@ public sealed partial class MainWindow : Window
         FormatBox.SelectedIndex = DefaultFormatBox.SelectedIndex;
         QualityBox.SelectedIndex = DefaultQualityBox.SelectedIndex;
         RootGrid.RequestedTheme = _settings.Theme == AppTheme.Light ? ElementTheme.Light : ElementTheme.Dark;
+        _backgroundImagePath = _settings.BackgroundImagePath;
+        ApplyBackgroundImage(_backgroundImagePath);
+    }
+
+    private async Task PlayPageEntranceAsync(string? tag)
+    {
+        await Task.Yield();
+        var (title, subtitle, content) = GetPageEntranceElements(tag);
+        if (!_uiSettings.AnimationsEnabled)
+        {
+            SetImmediatelyVisible(title);
+            SetImmediatelyVisible(subtitle);
+            foreach (var element in content)
+            {
+                SetImmediatelyVisible(element);
+            }
+
+            SetItemContainersImmediatelyVisible(tag);
+            return;
+        }
+
+        AnimateOpacity(title, TimeSpan.Zero);
+        AnimateOpacity(subtitle, TimeSpan.FromMilliseconds(60));
+        var delay = 120;
+        foreach (var element in content)
+        {
+            if (element.Visibility == Visibility.Visible)
+            {
+                AnimateSlideUp(element, TimeSpan.FromMilliseconds(delay));
+                delay += 55;
+            }
+        }
+
+        AnimateItemContainers(tag, delay);
+    }
+
+    private (UIElement Title, UIElement Subtitle, IReadOnlyList<UIElement> Content) GetPageEntranceElements(string? tag) => tag switch
+    {
+        "queue" => (QueuePageTitle, QueuePageSubtitle, [QueueEmptyState]),
+        "history" => (HistoryPageTitle, HistoryPageSubtitle, [HistoryControls, HistoryEmptyState]),
+        "settings" => (SettingsPageTitle, SettingsPageSubtitle, [DownloadDefaultsCard, AppearanceCard, SettingsSavePanel]),
+        _ => (DownloadPageTitle, DownloadPageSubtitle, [DownloadPrimaryCard, ResolvedResultPanel]),
+    };
+
+    private void AnimateItemContainers(string? tag, int delay)
+    {
+        var list = tag switch
+        {
+            "queue" => QueueList,
+            "history" => HistoryList,
+            _ => null,
+        };
+        if (list is null)
+        {
+            return;
+        }
+
+        foreach (var item in list.Items)
+        {
+            if (list.ContainerFromItem(item) is UIElement container)
+            {
+                AnimateSlideUp(container, TimeSpan.FromMilliseconds(delay));
+                delay += 55;
+            }
+        }
+    }
+
+    private void SetItemContainersImmediatelyVisible(string? tag)
+    {
+        var list = tag switch
+        {
+            "queue" => QueueList,
+            "history" => HistoryList,
+            _ => null,
+        };
+        if (list is null)
+        {
+            return;
+        }
+
+        foreach (var item in list.Items)
+        {
+            if (list.ContainerFromItem(item) is UIElement container)
+            {
+                SetImmediatelyVisible(container);
+            }
+        }
+    }
+
+    private static void AnimateOpacity(UIElement element, TimeSpan delay)
+    {
+        var visual = ElementCompositionPreview.GetElementVisual(element);
+        visual.StopAnimation("Opacity");
+        visual.Opacity = 0;
+        var animation = visual.Compositor.CreateScalarKeyFrameAnimation();
+        animation.InsertKeyFrame(1, 1);
+        animation.DelayTime = delay;
+        animation.Duration = TimeSpan.FromMilliseconds(160);
+        visual.StartAnimation("Opacity", animation);
+    }
+
+    private static void AnimateSlideUp(UIElement element, TimeSpan delay)
+    {
+        var visual = ElementCompositionPreview.GetElementVisual(element);
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+        visual.StopAnimation("Opacity");
+        visual.StopAnimation("Translation");
+        visual.Opacity = 0;
+        visual.Properties.InsertVector3("Translation", new Vector3(0, 16, 0));
+
+        var easing = visual.Compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
+        var opacity = visual.Compositor.CreateScalarKeyFrameAnimation();
+        opacity.InsertKeyFrame(1, 1, easing);
+        opacity.DelayTime = delay;
+        opacity.Duration = TimeSpan.FromMilliseconds(220);
+        var translation = visual.Compositor.CreateVector3KeyFrameAnimation();
+        translation.InsertKeyFrame(1, Vector3.Zero, easing);
+        translation.DelayTime = delay;
+        translation.Duration = TimeSpan.FromMilliseconds(220);
+        visual.StartAnimation("Opacity", opacity);
+        visual.StartAnimation("Translation", translation);
+    }
+
+    private static void SetImmediatelyVisible(UIElement element)
+    {
+        var visual = ElementCompositionPreview.GetElementVisual(element);
+        visual.StopAnimation("Opacity");
+        visual.StopAnimation("Translation");
+        visual.Opacity = 1;
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+        visual.Properties.InsertVector3("Translation", Vector3.Zero);
     }
 
     private void RootGridSizeChanged(object sender, SizeChangedEventArgs args)

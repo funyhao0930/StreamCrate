@@ -1,4 +1,5 @@
 using StreamCrate.Core.Models;
+using StreamCrate.App.Presentation;
 using StreamCrate.Infrastructure.Storage;
 
 namespace StreamCrate.Tests;
@@ -11,7 +12,12 @@ public sealed class AppSettingsStoreTests : IDisposable
     public async Task Save_then_load_preserves_download_and_theme_preferences()
     {
         var path = Path.Combine(_directory, "settings.json");
-        var expected = new AppSettings(@"D:\Media", DownloadFormat.Mp3, VideoQuality.P720, AppTheme.Light);
+        var expected = new AppSettings(
+            @"D:\Media",
+            DownloadFormat.Mp3,
+            VideoQuality.P720,
+            AppTheme.Light,
+            @"D:\Pictures\streamcrate-background.jpg");
 
         var writer = new JsonAppSettingsStore(path);
         await writer.SaveAsync(expected);
@@ -21,12 +27,59 @@ public sealed class AppSettingsStoreTests : IDisposable
         Assert.Equal(expected, loaded);
     }
 
+    [Fact]
+    public async Task Load_legacy_settings_without_background_path_uses_no_custom_background()
+    {
+        var path = Path.Combine(_directory, "settings.json");
+        Directory.CreateDirectory(_directory);
+        await File.WriteAllTextAsync(path, """
+        {
+          "downloadDirectory": "D:\\Media",
+          "defaultFormat": 0,
+          "defaultQuality": 0,
+          "theme": 1
+        }
+        """);
+
+        var loaded = await new JsonAppSettingsStore(path).LoadAsync();
+
+        Assert.Null(loaded.BackgroundImagePath);
+    }
+
+    [Fact]
+    public async Task Resolve_background_path_keeps_an_existing_supported_image()
+    {
+        var imagePath = Path.Combine(_directory, "background.jpg");
+        Directory.CreateDirectory(_directory);
+        await File.WriteAllTextAsync(imagePath, "test image placeholder");
+
+        var resolvedPath = BackgroundImagePathResolver.Resolve(imagePath);
+
+        Assert.Equal(imagePath, resolvedPath);
+    }
+
+    [Theory]
+    [InlineData("missing.png")]
+    [InlineData("unsupported.gif")]
+    public void Resolve_background_path_rejects_missing_or_unsupported_images(string fileName)
+    {
+        var resolvedPath = BackgroundImagePathResolver.Resolve(Path.Combine(_directory, fileName));
+
+        Assert.Null(resolvedPath);
+    }
+
     public void Dispose()
     {
         var settingsPath = Path.Combine(_directory, "settings.json");
         if (File.Exists(settingsPath))
         {
             File.Delete(settingsPath);
+        }
+
+        var imagePath = Path.Combine(_directory, "background.jpg");
+        if (File.Exists(imagePath))
+        {
+            File.Delete(imagePath);
         }
     }
 }
