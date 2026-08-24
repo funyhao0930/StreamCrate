@@ -368,7 +368,10 @@
                             <Border Style="{StaticResource CardBorderStyle}">
                                 <StackPanel Spacing="14">
                                     <TextBlock Text="下載預設" Style="{StaticResource SectionLabelTextBlockStyle}" />
-                                    <TextBox x:Name="DownloadFolderBox" Header="下載資料夾" />
+                                    <StackPanel Spacing="8">
+                                        <TextBox x:Name="DownloadFolderBox" Header="下載資料夾" IsReadOnly="True" />
+                                        <Button Content="選擇資料夾" HorizontalAlignment="Left" Click="ChooseDownloadFolderClicked" />
+                                    </StackPanel>
                                     <StackPanel x:Name="SettingsOptionsPanel" Orientation="Horizontal" Spacing="12">
                                         <ComboBox x:Name="DefaultFormatBox" Header="預設格式" Width="180">
                                             <ComboBoxItem Content="MP4" />
