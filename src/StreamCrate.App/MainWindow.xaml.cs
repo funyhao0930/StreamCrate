@@ -421,6 +421,19 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private async void ChooseDownloadFolderClicked(object sender, RoutedEventArgs args)
+    {
+        var picker = new FolderPicker();
+        picker.FileTypeFilter.Add("*");
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(this));
+        var folder = await picker.PickSingleFolderAsync();
+        if (folder is not null)
+        {
+            DownloadFolderBox.Text = folder.Path;
+            SettingsMessage.Text = "資料夾已選擇，請儲存設定後套用。";
+        }
+    }
+
     private async void SaveSettingsClicked(object sender, RoutedEventArgs args)
     {
         var directory = DownloadFolderBox.Text.Trim();
