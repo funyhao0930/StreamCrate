@@ -181,6 +181,26 @@ public sealed class PresentationContractTests
         Assert.Same(first, items[1]);
     }
 
+    [Theory]
+    [InlineData(0, 0, false)]
+    [InlineData(3, 0, true)]
+    [InlineData(3, 2, true)]
+    [InlineData(3, 3, false)]
+    public void Page_entrance_waits_for_layout_until_all_item_containers_are_realized(
+        int itemCount,
+        int realizedContainerCount,
+        bool expected)
+    {
+        var type = typeof(MainWindow).Assembly.GetType("StreamCrate.App.Presentation.PageEntranceAnimationScheduler");
+        Assert.NotNull(type);
+        var method = type.GetMethod("RequiresLayoutPass", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        Assert.NotNull(method);
+
+        var requiresLayoutPass = Assert.IsType<bool>(method.Invoke(null, [itemCount, realizedContainerCount]));
+
+        Assert.Equal(expected, requiresLayoutPass);
+    }
+
     private static IReadOnlyList<DownloadRequest> InvokePlaylistBuilder(
         IReadOnlyList<MediaItem> items,
         IReadOnlyList<bool> selected,

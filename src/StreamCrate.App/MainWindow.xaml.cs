@@ -614,7 +614,7 @@ public sealed partial class MainWindow : Window
             }
         }
 
-        AnimateItemContainers(tag, delay);
+        await AnimateItemContainersAsync(tag, delay);
     }
 
     private (UIElement Title, UIElement Subtitle, IReadOnlyList<UIElement> Content) GetPageEntranceElements(string? tag) => tag switch
@@ -625,9 +625,15 @@ public sealed partial class MainWindow : Window
         _ => (DownloadPageTitle, DownloadPageSubtitle, [DownloadPrimaryCard, ResolvedResultPanel]),
     };
 
-    private void AnimateItemContainers(string? tag, int delay)
+    private async Task AnimateItemContainersAsync(string? tag, int delay)
     {
-        foreach (var list in GetAnimatedItemLists(tag))
+        var lists = GetAnimatedItemLists(tag);
+        if (PageEntranceAnimationScheduler.RequiresLayoutPass(GetItemCount(lists), GetRealizedContainerCount(lists)))
+        {
+            await WaitForNextLayoutAsync();
+        }
+
+        foreach (var list in lists)
         {
             foreach (var item in list.Items)
             {
@@ -639,6 +645,24 @@ public sealed partial class MainWindow : Window
             }
         }
     }
+
+    private Task WaitForNextLayoutAsync()
+    {
+        var completion = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        void LayoutUpdated(object? sender, object args)
+        {
+            RootGrid.LayoutUpdated -= LayoutUpdated;
+            completion.TrySetResult(null);
+        }
+
+        RootGrid.LayoutUpdated += LayoutUpdated;
+        return completion.Task;
+    }
+
+    private static int GetItemCount(IReadOnlyList<ItemsControl> lists) => lists.Sum(list => list.Items.Count);
+
+    private static int GetRealizedContainerCount(IReadOnlyList<ItemsControl> lists) => lists.Sum(list =>
+        list.Items.Cast<object>().Count(item => list.ContainerFromItem(item) is UIElement));
 
     private void SetItemContainersImmediatelyVisible(string? tag)
     {
