@@ -1,7 +1,7 @@
 #define MyAppName "StreamCrate"
 #define MyAppVersion "1.0.2"
 #define MyAppPublisher "StreamCrate contributors"
-#define MyAppURL "https://github.com/"
+#define MyAppURL "https://github.com/funyhao0930/StreamCrate"
 #define MyAppExeName "StreamCrate.App.exe"
 #define MyPublishDir "..\\artifacts\\publish"
 #define MyAppIconFile "..\\src\\StreamCrate.App\\Assets\\StreamCrate.ico"
