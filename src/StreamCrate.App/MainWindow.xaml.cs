@@ -41,6 +41,11 @@ public sealed partial class MainWindow : Window
     private string _selectedNavTag = "download";
     private readonly List<double> _throughputSamples = [];
     private const int ThroughputSampleCount = 24;
+    // yt-dlp reports progress several times a second. Feeding every report straight into the
+    // readout and the sparkline made both jitter, so the rate is latched here and sampled on a
+    // steady one-second beat instead; the per-job progress bars still update on every report.
+    private readonly DispatcherTimer _throughputTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private double _latestThroughput;
     // Starts true so the settings controls' change events, which fire while XAML is still
     // loading (MotionTempoBox carries SelectedIndex="1"), cannot touch controls that do not
     // exist yet. ApplySettings clears it once the window is fully built.
@@ -63,6 +68,7 @@ public sealed partial class MainWindow : Window
         _history = new SqliteHistoryStore(Path.Combine(dataDirectory, "history.db"));
         _queue = new DownloadQueueService(ExecuteDownloadAsync);
         _queue.JobChanged += QueueJobChanged;
+        _throughputTimer.Tick += ThroughputTimerTick;
         BuildSegmentedSelectors();
         InProgressQueueList.ItemsSource = _inProgressQueueItems;
         CompletedQueueList.ItemsSource = _completedQueueItems;
@@ -309,6 +315,7 @@ public sealed partial class MainWindow : Window
         ResultMetaText.Text = $"{media.Extractor} · {FormatDuration(media.Duration)}";
         SingleResultPanel.Visibility = Visibility.Visible;
         PlaylistResultPanel.Visibility = Visibility.Collapsed;
+        ShowResultThumbnail(media.ThumbnailUrl);
         QueueButton.Content = "加入下載佇列";
         QueueButton.IsEnabled = true;
         ResolvedResultPanel.Visibility = Visibility.Visible;
@@ -324,9 +331,20 @@ public sealed partial class MainWindow : Window
         PlaylistCountText.Text = $"共找到 {playlist.Items.Count} 部影片，可依需要取消勾選。";
         SingleResultPanel.Visibility = Visibility.Collapsed;
         PlaylistResultPanel.Visibility = Visibility.Visible;
+        // A playlist result stands for many videos, so the tile shows the first item's still.
+        ShowResultThumbnail(playlist.Items.FirstOrDefault()?.ThumbnailUrl);
         UpdatePlaylistSelectionSummary();
         ResolvedResultPanel.Visibility = Visibility.Visible;
     }
+
+    private void ShowResultThumbnail(Uri? thumbnailUrl)
+    {
+        var source = Thumbnails.Load(thumbnailUrl, ResultThumbnailWidth);
+        ResultThumbnail.Source = source;
+        ResultThumbnail.Visibility = source is null ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private const int ResultThumbnailWidth = 176;
 
     private void PlaylistSelectionChanged(object? sender, EventArgs args) => UpdatePlaylistSelectionSummary();
 
@@ -533,7 +551,8 @@ public sealed partial class MainWindow : Window
                     job.Request.OutputDirectory,
                     job.State,
                     job.ErrorCategory,
-                    job.CreatedAt));
+                    job.CreatedAt,
+                    job.Request.Media.ThumbnailUrl));
             }
 
             RenderQueue();
@@ -621,12 +640,35 @@ public sealed partial class MainWindow : Window
 
     private void UpdateThroughput(IReadOnlyList<DownloadJob> jobs)
     {
-        var megabytesPerSecond = jobs
+        _latestThroughput = jobs
             .Where(job => job.State == DownloadJobState.Downloading)
             .Sum(job => TransferRate.ToMegabytesPerSecond(job.Progress?.Speed));
 
-        QueueThroughputText.Text = megabytesPerSecond.ToString(megabytesPerSecond >= 100 ? "0" : "0.0");
-        _throughputSamples.Add(megabytesPerSecond);
+        if (_latestThroughput > 0 || jobs.Any(job => job.State == DownloadJobState.Downloading))
+        {
+            if (!_throughputTimer.IsEnabled)
+            {
+                _throughputTimer.Start();
+                SampleThroughput();
+            }
+
+            return;
+        }
+
+        if (_throughputTimer.IsEnabled)
+        {
+            _throughputTimer.Stop();
+            _latestThroughput = 0;
+            SampleThroughput();
+        }
+    }
+
+    private void ThroughputTimerTick(object? sender, object args) => SampleThroughput();
+
+    private void SampleThroughput()
+    {
+        QueueThroughputText.Text = _latestThroughput.ToString(_latestThroughput >= 100 ? "0" : "0.0");
+        _throughputSamples.Add(_latestThroughput);
         while (_throughputSamples.Count > ThroughputSampleCount)
         {
             _throughputSamples.RemoveAt(0);

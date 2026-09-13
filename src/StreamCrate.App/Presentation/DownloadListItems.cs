@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 using StreamCrate.Core.Models;
 using StreamCrate.Infrastructure.Diagnostics;
 
@@ -14,13 +15,23 @@ internal sealed class QueueItem : ObservableObject
         Title = job.Request.Media.Title;
         OutputPath = job.Request.OutputDirectory;
         Request = job.Request;
+        Thumbnail = Thumbnails.Load(job.Request.Media.ThumbnailUrl, QueueThumbnailWidth);
+        ThumbnailVisibility = Thumbnail is null ? Visibility.Collapsed : Visibility.Visible;
         Update(job);
     }
+
+    private const int QueueThumbnailWidth = 44;
 
     public Guid Id { get; }
     public string Title { get; }
     public string OutputPath { get; }
     public DownloadRequest Request { get; }
+
+    /// <summary>Still for the row, or null when the source published none.</summary>
+    public ImageSource? Thumbnail { get; }
+
+    /// <summary>Keeps the empty placeholder tile visible when there is no still to show.</summary>
+    public Visibility ThumbnailVisibility { get; }
 
     private string _section = string.Empty;
     public string Section
@@ -225,6 +236,8 @@ internal sealed class HistoryItem
         SourceUrl = entry.SourceUrl.ToString();
         IsFailed = entry.State is DownloadJobState.Failed;
         SizeText = DescribeSize(entry.OutputPath);
+        Thumbnail = Thumbnails.Load(entry.ThumbnailUrl, HistoryThumbnailWidth);
+        ThumbnailVisibility = Thumbnail is null ? Visibility.Collapsed : Visibility.Visible;
     }
 
     public string Title { get; }
@@ -233,6 +246,10 @@ internal sealed class HistoryItem
     public string SourceUrl { get; }
     public bool IsFailed { get; }
     public string SizeText { get; }
+    public ImageSource? Thumbnail { get; }
+    public Visibility ThumbnailVisibility { get; }
+
+    private const int HistoryThumbnailWidth = 52;
 
     /// <summary>
     /// Bytes on disk for the row, or 0 when the file is gone; also feeds the "佔用空間" metric.

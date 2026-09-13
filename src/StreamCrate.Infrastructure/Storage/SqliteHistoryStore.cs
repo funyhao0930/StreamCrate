@@ -24,12 +24,13 @@ public sealed class SqliteHistoryStore(string path) : IHistoryStore
         await connection.OpenAsync(cancellationToken);
         await using var command = connection.CreateCommand();
         command.CommandText = """
-            INSERT INTO history (id, extractor, media_id, title, source_url, format, quality, output_path, state, error_category, created_at)
-            VALUES ($id, $extractor, $mediaId, $title, $sourceUrl, $format, $quality, $outputPath, $state, $errorCategory, $createdAt)
+            INSERT INTO history (id, extractor, media_id, title, source_url, format, quality, output_path, state, error_category, created_at, thumbnail_url)
+            VALUES ($id, $extractor, $mediaId, $title, $sourceUrl, $format, $quality, $outputPath, $state, $errorCategory, $createdAt, $thumbnailUrl)
             ON CONFLICT(id) DO UPDATE SET
                 state = excluded.state,
                 error_category = excluded.error_category,
-                output_path = excluded.output_path;
+                output_path = excluded.output_path,
+                thumbnail_url = excluded.thumbnail_url;
             """;
         command.Parameters.AddWithValue("$id", entry.Id.ToString("D"));
         command.Parameters.AddWithValue("$extractor", entry.Extractor);
@@ -42,6 +43,9 @@ public sealed class SqliteHistoryStore(string path) : IHistoryStore
         command.Parameters.AddWithValue("$state", entry.State.ToString());
         command.Parameters.AddWithValue("$errorCategory", (object?)entry.ErrorCategory ?? DBNull.Value);
         command.Parameters.AddWithValue("$createdAt", entry.CreatedAt.ToString("O"));
+        // The thumbnail URL is the publisher's own CDN address and carries no user data, so it is
+        // stored as-is rather than going through RedactUrl, which would strip the signing query.
+        command.Parameters.AddWithValue("$thumbnailUrl", (object?)entry.ThumbnailUrl?.AbsoluteUri ?? DBNull.Value);
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
@@ -52,7 +56,7 @@ public sealed class SqliteHistoryStore(string path) : IHistoryStore
         await connection.OpenAsync(cancellationToken);
         await using var command = connection.CreateCommand();
         command.CommandText = """
-            SELECT id, extractor, media_id, title, source_url, format, quality, output_path, state, error_category, created_at
+            SELECT id, extractor, media_id, title, source_url, format, quality, output_path, state, error_category, created_at, thumbnail_url
             FROM history
             WHERE ($query = '' OR title LIKE $like ESCAPE '\' OR media_id LIKE $like ESCAPE '\')
               AND ($state IS NULL OR state = $state)
@@ -70,7 +74,8 @@ public sealed class SqliteHistoryStore(string path) : IHistoryStore
             entries.Add(new HistoryEntry(
                 Guid.Parse(reader.GetString(0)), reader.GetString(1), reader.GetString(2), reader.GetString(3), new Uri(reader.GetString(4)),
                 Enum.Parse<DownloadFormat>(reader.GetString(5)), Enum.Parse<VideoQuality>(reader.GetString(6)), reader.GetString(7),
-                Enum.Parse<DownloadJobState>(reader.GetString(8)), reader.IsDBNull(9) ? null : reader.GetString(9), DateTimeOffset.Parse(reader.GetString(10))));
+                Enum.Parse<DownloadJobState>(reader.GetString(8)), reader.IsDBNull(9) ? null : reader.GetString(9), DateTimeOffset.Parse(reader.GetString(10)),
+                reader.IsDBNull(11) || !Uri.TryCreate(reader.GetString(11), UriKind.Absolute, out var thumbnailUrl) ? null : thumbnailUrl));
         }
 
         return entries;
@@ -105,11 +110,32 @@ public sealed class SqliteHistoryStore(string path) : IHistoryStore
                 output_path TEXT NOT NULL,
                 state TEXT NOT NULL,
                 error_category TEXT NULL,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                thumbnail_url TEXT NULL
             );
             CREATE INDEX IF NOT EXISTS ix_history_created_at ON history(created_at DESC);
             """;
         await command.ExecuteNonQueryAsync(cancellationToken);
+        await AddMissingColumnAsync(connection, "thumbnail_url", cancellationToken);
+    }
+
+    /// <summary>
+    /// Brings a database written by an older build up to date. SQLite has no "ADD COLUMN IF NOT
+    /// EXISTS", so the column list is read first.
+    /// </summary>
+    private static async Task AddMissingColumnAsync(SqliteConnection connection, string column, CancellationToken cancellationToken)
+    {
+        await using var inspect = connection.CreateCommand();
+        inspect.CommandText = "SELECT COUNT(*) FROM pragma_table_info('history') WHERE name = $column;";
+        inspect.Parameters.AddWithValue("$column", column);
+        if (Convert.ToInt64(await inspect.ExecuteScalarAsync(cancellationToken)) > 0)
+        {
+            return;
+        }
+
+        await using var alter = connection.CreateCommand();
+        alter.CommandText = $"ALTER TABLE history ADD COLUMN {column} TEXT NULL;";
+        await alter.ExecuteNonQueryAsync(cancellationToken);
     }
 
     private static Uri RedactUrl(Uri source) => new UriBuilder(source) { Query = string.Empty, Fragment = string.Empty }.Uri;

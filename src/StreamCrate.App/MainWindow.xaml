@@ -233,7 +233,9 @@
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <Border Width="44" Height="26" VerticalAlignment="Top" Style="{StaticResource ThumbnailBorderStyle}" />
+                                            <Border Width="44" Height="26" VerticalAlignment="Top" Style="{StaticResource ThumbnailBorderStyle}">
+                                                <Image Source="{Binding Thumbnail}" Visibility="{Binding ThumbnailVisibility}" Stretch="UniformToFill" />
+                                            </Border>
                                             <StackPanel Grid.Column="1">
                                                 <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" LineHeight="17" TextTrimming="CharacterEllipsis" />
                                                 <TextBlock Text="{Binding Details}" Margin="0,4,0,0" Style="{StaticResource UtilityTextBlockStyle}" FontSize="10.5" TextTrimming="CharacterEllipsis" />
@@ -389,7 +391,9 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="52" Height="30" VerticalAlignment="Center" Style="{StaticResource ThumbnailBorderStyle}" />
+                                        <Border Width="52" Height="30" VerticalAlignment="Center" Style="{StaticResource ThumbnailBorderStyle}">
+                                            <Image Source="{Binding Thumbnail}" Visibility="{Binding ThumbnailVisibility}" Stretch="UniformToFill" />
+                                        </Border>
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                                             <TextBlock Text="{Binding Details}" Margin="0,3,0,0" Style="{StaticResource UtilityTextBlockStyle}" FontSize="10.5" />
@@ -645,13 +649,16 @@
                                                     Background="{ThemeResource AppSurfaceSubtleBrush}"
                                                     BorderBrush="{ThemeResource AppBorderBrush}"
                                                     BorderThickness="1">
-                                                    <TextBlock
-                                                        Text="影片縮圖"
-                                                        HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"
-                                                        Style="{StaticResource UtilityTextBlockStyle}"
-                                                        FontSize="9.5"
-                                                        Foreground="{ThemeResource AppFaintTextBrush}" />
+                                                    <Grid>
+                                                        <TextBlock
+                                                            Text="影片縮圖"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Style="{StaticResource UtilityTextBlockStyle}"
+                                                            FontSize="9.5"
+                                                            Foreground="{ThemeResource AppFaintTextBrush}" />
+                                                        <Image x:Name="ResultThumbnail" Stretch="UniformToFill" Visibility="Collapsed" />
+                                                    </Grid>
                                                 </Border>
                                                 <StackPanel Grid.Column="1">
                                                     <StackPanel x:Name="SingleResultPanel">

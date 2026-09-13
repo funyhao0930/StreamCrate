@@ -128,7 +128,8 @@ public sealed record HistoryEntry(
     string OutputPath,
     DownloadJobState State,
     string? ErrorCategory,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    Uri? ThumbnailUrl = null);
 
 public sealed record AppSettings(
     string DownloadDirectory,
