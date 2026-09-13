@@ -373,7 +373,6 @@
 
                             <DataTemplate x:Key="HistoryEntryTemplate">
                                 <Border
-                                    Margin="{Binding Indent}"
                                     Padding="16,13"
                                     Background="{ThemeResource AppSurfaceBrush}"
                                     BorderBrush="{ThemeResource AppBorderBrush}"
@@ -400,7 +399,6 @@
 
                             <DataTemplate x:Key="HistoryFailedEntryTemplate">
                                 <Border
-                                    Margin="{Binding Indent}"
                                     Padding="16,13"
                                     Background="{ThemeResource AppErrorSoftBrush}"
                                     BorderBrush="{ThemeResource AppErrorBorderBrush}"
@@ -545,9 +543,9 @@
                                                     CornerRadius="13"
                                                     Background="Transparent"
                                                     BorderThickness="0"
-                                                    Padding="18,0,132,0"
+                                                    Padding="18,17,132,0"
                                                     VerticalAlignment="Center"
-                                                    VerticalContentAlignment="Center"
+                                                    VerticalContentAlignment="Top"
                                                     FontFamily="{StaticResource AppUtilityFontFamily}"
                                                     FontSize="14.5"
                                                     PlaceholderText="貼上 http 或 https 網址"

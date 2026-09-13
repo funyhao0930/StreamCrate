@@ -64,7 +64,7 @@ public sealed class TimelineAndRateTests
     }
 
     [Fact]
-    public void History_rows_indent_progressively_and_flag_failures()
+    public void History_rows_flag_failures()
     {
         var today = new DateTime(2026, 9, 13);
         var entries = new[]
@@ -77,7 +77,6 @@ public sealed class TimelineAndRateTests
 
         Assert.False(GetProperty<bool>(rows[0], "IsFailed"));
         Assert.True(GetProperty<bool>(rows[1], "IsFailed"));
-        Assert.True(LeftOf(rows[1]) > LeftOf(rows[0]));
     }
 
     private static HistoryEntry CreateEntry(string title, DateTime localCreatedAt, DownloadJobState state) => new(
@@ -110,9 +109,6 @@ public sealed class TimelineAndRateTests
 
     private static T GetProperty<T>(object instance, string name) =>
         (T)instance.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.Instance)!.GetValue(instance)!;
-
-    private static double LeftOf(object row) =>
-        (double)GetProperty<object>(row, "Indent").GetType().GetProperty("Left")!.GetValue(GetProperty<object>(row, "Indent"))!;
 
     private static double XOf(object point) => (double)point.GetType().GetField("Item1")!.GetValue(point)!;
 

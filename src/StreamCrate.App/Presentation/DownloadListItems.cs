@@ -175,14 +175,13 @@ internal static class QueueSectionSynchronizer
 
 internal sealed class HistoryItem
 {
-    public HistoryItem(HistoryEntry entry, double indent = 0)
+    public HistoryItem(HistoryEntry entry)
     {
         Title = entry.Title;
         Details = $"{DownloadStateText.Get(entry.State)} · {FormatText(entry.Format)} · {entry.CreatedAt.LocalDateTime:t}";
         OutputPath = entry.OutputPath;
         SourceUrl = entry.SourceUrl.ToString();
         IsFailed = entry.State is DownloadJobState.Failed;
-        Indent = new Thickness(indent, 0, 0, 0);
         SizeText = DescribeSize(entry.OutputPath);
     }
 
@@ -191,7 +190,6 @@ internal sealed class HistoryItem
     public string OutputPath { get; }
     public string SourceUrl { get; }
     public bool IsFailed { get; }
-    public Thickness Indent { get; }
     public string SizeText { get; }
 
     /// <summary>

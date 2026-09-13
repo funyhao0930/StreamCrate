@@ -26,13 +26,12 @@ internal sealed class HistoryDayGroup
     public ObservableCollection<HistoryItem> Items { get; }
 
     /// <summary>
-    /// Groups entries newest day first, indenting each row a little further than the one above it
-    /// so the timeline reads as a cascade rather than a flat list.
+    /// Groups entries newest day first. Rows all share one left edge so the timeline reads as a
+    /// single column against the rule.
     /// </summary>
     public static IReadOnlyList<HistoryDayGroup> Build(IEnumerable<HistoryEntry> entries, DateTime today)
     {
         var groups = new List<HistoryDayGroup>();
-        var indentStep = 0;
         var ordered = entries
             .OrderByDescending(entry => entry.CreatedAt)
             .GroupBy(entry => entry.CreatedAt.LocalDateTime.Date);
@@ -42,8 +41,7 @@ internal sealed class HistoryDayGroup
             var items = new List<HistoryItem>();
             foreach (var entry in group)
             {
-                items.Add(new HistoryItem(entry, Math.Min(indentStep, MaxIndentSteps) * IndentPixels));
-                indentStep++;
+                items.Add(new HistoryItem(entry));
             }
 
             groups.Add(new HistoryDayGroup(group.Key, group.Key == today, items));
@@ -52,8 +50,6 @@ internal sealed class HistoryDayGroup
         return groups;
     }
 
-    private const int MaxIndentSteps = 3;
-    private const double IndentPixels = 18;
 }
 
 /// <summary>
