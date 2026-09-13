@@ -146,15 +146,35 @@ public sealed class PresentationContractTests
     public void Queue_view_defines_separate_status_sections_with_motion_and_status_actions()
     {
         var xaml = File.ReadAllText(FindRepositoryFile("src", "StreamCrate.App", "MainWindow.xaml"));
+        var theme = File.ReadAllText(FindRepositoryFile("src", "StreamCrate.App", "Themes", "StreamCrateTheme.xaml"));
 
+        Assert.Contains("x:Name=\"QueueBoard\"", xaml, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"InProgressQueueSection\"", xaml, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"CompletedQueueSection\"", xaml, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"FailedQueueSection\"", xaml, StringComparison.Ordinal);
         Assert.Contains("RepositionThemeTransition", xaml, StringComparison.Ordinal);
         Assert.Contains("開啟檔案位置", xaml, StringComparison.Ordinal);
-        Assert.Contains("Tag=\"{Binding OutputPath}\" Click=\"OpenQueueFolderClicked\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("✖", xaml, StringComparison.Ordinal);
-        Assert.Contains("#33FF4D4F", xaml, StringComparison.Ordinal);
+        Assert.Contains("Tag=\"{Binding OutputPath}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("Click=\"OpenQueueFolderClicked\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("AppErrorBrush", xaml, StringComparison.Ordinal);
+        Assert.Contains("Color=\"#F27A7E\"", theme, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Motion_design_uses_authoritative_tokens_and_respects_reduced_motion()
+    {
+        var xaml = File.ReadAllText(FindRepositoryFile("src", "StreamCrate.App", "MainWindow.xaml"));
+        var theme = File.ReadAllText(FindRepositoryFile("src", "StreamCrate.App", "Themes", "StreamCrateTheme.xaml"));
+        var codeBehind = File.ReadAllText(FindRepositoryFile("src", "StreamCrate.App", "MainWindow.xaml.cs"));
+
+        Assert.Contains("x:Name=\"AuroraOne\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"AuroraTwo\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"MotionTempoBox\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("AppPrimaryBrush\" Color=\"#4CC9A7\"", theme, StringComparison.Ordinal);
+        Assert.Contains("Instrument Serif, Noto Serif TC", theme, StringComparison.Ordinal);
+        Assert.Contains("MotionTime(220)", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("if (!_uiSettings.AnimationsEnabled)", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("AnimationIterationBehavior.Forever", codeBehind, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -13,12 +13,14 @@ internal sealed class QueueItem : ObservableObject
         Id = job.Id;
         Title = job.Request.Media.Title;
         OutputPath = job.Request.OutputDirectory;
+        Request = job.Request;
         Update(job);
     }
 
     public Guid Id { get; }
     public string Title { get; }
     public string OutputPath { get; }
+    public DownloadRequest Request { get; }
 
     private string _section = string.Empty;
     public string Section
@@ -164,14 +166,22 @@ internal static class QueueSectionSynchronizer
 
 internal sealed class HistoryItem
 {
-    public HistoryItem(HistoryEntry entry)
+    public HistoryItem(HistoryEntry entry, double indent = 0)
     {
         Title = entry.Title;
-        Details = $"{DownloadStateText.Get(entry.State)} · {entry.Format} · {entry.CreatedAt.LocalDateTime:g}";
+        Details = $"{DownloadStateText.Get(entry.State)} · {FormatText(entry.Format)} · {entry.CreatedAt.LocalDateTime:t}";
         OutputPath = entry.OutputPath;
+        SourceUrl = entry.SourceUrl.ToString();
+        IsFailed = entry.State is DownloadJobState.Failed;
+        Indent = new Thickness(indent, 0, 0, 0);
     }
 
     public string Title { get; }
     public string Details { get; }
     public string OutputPath { get; }
+    public string SourceUrl { get; }
+    public bool IsFailed { get; }
+    public Thickness Indent { get; }
+
+    private static string FormatText(DownloadFormat format) => format == DownloadFormat.Mp3 ? "MP3" : "MP4";
 }

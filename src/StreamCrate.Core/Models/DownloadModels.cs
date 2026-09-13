@@ -135,7 +135,8 @@ public sealed record AppSettings(
     DownloadFormat DefaultFormat,
     VideoQuality DefaultQuality,
     AppTheme Theme,
-    string? BackgroundImagePath = null)
+    string? BackgroundImagePath = null,
+    double MotionTempo = 1.0)
 {
     public static AppSettings CreateDefault() => new(
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),

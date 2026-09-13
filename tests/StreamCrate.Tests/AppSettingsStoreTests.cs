@@ -18,7 +18,8 @@ public sealed class AppSettingsStoreTests : IDisposable
             DownloadFormat.Mp3,
             VideoQuality.P720,
             AppTheme.Light,
-            @"D:\Pictures\streamcrate-background.jpg");
+            @"D:\Pictures\streamcrate-background.jpg",
+            1.25);
 
         var writer = new JsonAppSettingsStore(path);
         await writer.SaveAsync(expected);
@@ -45,6 +46,7 @@ public sealed class AppSettingsStoreTests : IDisposable
         var loaded = await new JsonAppSettingsStore(path).LoadAsync();
 
         Assert.Null(loaded.BackgroundImagePath);
+        Assert.Equal(1.0, loaded.MotionTempo);
     }
 
     [Fact]

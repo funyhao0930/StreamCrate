@@ -27,7 +27,7 @@ public sealed partial class MainWindow : Window
     private readonly ObservableCollection<QueueItem> _completedQueueItems = [];
     private readonly ObservableCollection<QueueItem> _failedQueueItems = [];
     private readonly Dictionary<Guid, QueueItem> _queueItemsById = [];
-    private readonly ObservableCollection<HistoryItem> _historyItems = [];
+    private readonly ObservableCollection<HistoryDayGroup> _historyGroups = [];
     private readonly HashSet<Guid> _storedHistoryIds = [];
     private AppSettings _settings = AppSettings.CreateDefault();
     private bool _toolsReady;
@@ -38,13 +38,21 @@ public sealed partial class MainWindow : Window
     private CookieSelection _probedCookies = CookieSelection.None;
     private readonly UISettings _uiSettings = new();
     private string? _backgroundImagePath;
+    private string _selectedNavTag = "download";
+    private readonly List<double> _throughputSamples = [];
+    private const int ThroughputSampleCount = 24;
+    // Starts true so the settings controls' change events, which fire while XAML is still
+    // loading (MotionTempoBox carries SelectedIndex="1"), cannot touch controls that do not
+    // exist yet. ApplySettings clears it once the window is fully built.
+    private bool _isApplyingSettings = true;
+    private const float NavItemHeight = 40f;
 
     public MainWindow()
     {
         InitializeComponent();
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
-        AppWindow.Resize(new Windows.Graphics.SizeInt32(1100, 760));
+        AppWindow.Resize(new Windows.Graphics.SizeInt32(1280, 820));
         var dataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StreamCrate");
         _settingsStore = new JsonAppSettingsStore(Path.Combine(dataDirectory, "settings.json"));
         _history = new SqliteHistoryStore(Path.Combine(dataDirectory, "history.db"));
@@ -53,7 +61,16 @@ public sealed partial class MainWindow : Window
         InProgressQueueList.ItemsSource = _inProgressQueueItems;
         CompletedQueueList.ItemsSource = _completedQueueItems;
         FailedQueueList.ItemsSource = _failedQueueItems;
-        HistoryList.ItemsSource = _historyItems;
+        HistoryList.ItemsSource = _historyGroups;
+        Activated += InitializeNavOnFirstActivation;
+    }
+
+    private void InitializeNavOnFirstActivation(object sender, WindowActivatedEventArgs args)
+    {
+        Activated -= InitializeNavOnFirstActivation;
+        UpdateNavItemVisuals();
+        MoveNavIndicator(NavIndexOf(_selectedNavTag), animate: false);
+        _ = PlayPageEntranceAsync(_selectedNavTag);
     }
 
     public async Task InitializeAsync()
@@ -108,14 +125,72 @@ public sealed partial class MainWindow : Window
 
     private async void RetryToolsClicked(object sender, RoutedEventArgs args) => await EnsureToolsAsync();
 
-    private async void NavigationSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    private async void NavItemClicked(object sender, RoutedEventArgs args)
     {
-        if (args.SelectedItem is not NavigationViewItem item)
+        if ((sender as FrameworkElement)?.Tag is string tag)
         {
+            await SelectNavAsync(tag);
+        }
+    }
+
+    private async Task SelectNavAsync(string tag)
+    {
+        _selectedNavTag = tag;
+        UpdateNavItemVisuals();
+        MoveNavIndicator(NavIndexOf(tag));
+        await ShowPanelAsync(tag);
+    }
+
+    private IReadOnlyList<Button> NavButtons => NavItemsPanel.Children.OfType<Button>().ToArray();
+
+    private int NavIndexOf(string tag)
+    {
+        var buttons = NavButtons;
+        for (var index = 0; index < buttons.Count; index++)
+        {
+            if (Equals(buttons[index].Tag, tag))
+            {
+                return index;
+            }
+        }
+
+        return 0;
+    }
+
+    private void UpdateNavItemVisuals()
+    {
+        foreach (var button in NavButtons)
+        {
+            var selected = Equals(button.Tag, _selectedNavTag);
+            button.Style = (Style)Application.Current.Resources[selected ? "NavItemSelectedButtonStyle" : "NavItemButtonStyle"];
+        }
+    }
+
+    private void NavItemsPanelSizeChanged(object sender, SizeChangedEventArgs args)
+    {
+        NavIndicator.Width = Math.Max(args.NewSize.Width, 0);
+        MoveNavIndicator(NavIndexOf(_selectedNavTag), animate: false);
+    }
+
+    private void MoveNavIndicator(int index, bool animate = true)
+    {
+        var target = index * NavItemHeight;
+        ElementCompositionPreview.SetIsTranslationEnabled(NavIndicator, true);
+        var visual = ElementCompositionPreview.GetElementVisual(NavIndicator);
+        visual.StopAnimation("Translation");
+        if (!animate || !_uiSettings.AnimationsEnabled)
+        {
+            visual.Properties.InsertVector3("Translation", new Vector3(0, target, 0));
+            NavIndicator.Opacity = 1;
             return;
         }
 
-        await ShowPanelAsync(item.Tag?.ToString());
+        NavIndicator.Opacity = 1;
+        var easing = visual.Compositor.CreateCubicBezierEasingFunction(new Vector2(0.12f, 0.9f), new Vector2(0.18f, 1));
+        var animation = visual.Compositor.CreateVector3KeyFrameAnimation();
+        animation.InsertKeyFrame(1, new Vector3(0, target, 0), easing);
+        animation.Duration = MotionTime(340);
+        visual.StartAnimation("Translation", animation);
     }
 
     private async Task ShowPanelAsync(string? tag)
@@ -268,16 +343,7 @@ public sealed partial class MainWindow : Window
             : [new DownloadRequest(_probedMedia, _settings.DownloadDirectory, format, quality, _probedCookies)];
     }
 
-    private void ViewQueueClicked(object sender, RoutedEventArgs args)
-    {
-        if (ReferenceEquals(RootNavigation.SelectedItem, QueueNavigationItem))
-        {
-            _ = ShowPanelAsync("queue");
-            return;
-        }
-
-        RootNavigation.SelectedItem = QueueNavigationItem;
-    }
+    private void ViewQueueClicked(object sender, RoutedEventArgs args) => _ = SelectNavAsync("queue");
 
     private void UrlTextChanged(object sender, TextChangedEventArgs args)
     {
@@ -348,6 +414,7 @@ public sealed partial class MainWindow : Window
         _backgroundImagePath = file.Path;
         ApplyBackgroundImage(_backgroundImagePath);
         SettingsMessage.Text = "背景圖片已預覽；按「儲存設定」後會保留這項偏好。";
+        UpdateSettingsDirtyState();
     }
 
     private void ClearBackgroundImageClicked(object sender, RoutedEventArgs args)
@@ -355,6 +422,7 @@ public sealed partial class MainWindow : Window
         _backgroundImagePath = null;
         ApplyBackgroundImage(null);
         SettingsMessage.Text = "背景圖片已清除預覽；按「儲存設定」後會保留這項偏好。";
+        UpdateSettingsDirtyState();
     }
 
     private void ApplyBackgroundImage(string? path)
@@ -437,6 +505,30 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private async void RetryJobClicked(object sender, RoutedEventArgs args)
+    {
+        if ((sender as FrameworkElement)?.Tag is not Guid jobId
+            || !_queueItemsById.TryGetValue(jobId, out var item))
+        {
+            return;
+        }
+
+        await _queue.EnqueueAsync(item.Request);
+        RenderQueue();
+    }
+
+    private void CopyJobErrorClicked(object sender, RoutedEventArgs args)
+    {
+        if ((sender as FrameworkElement)?.Tag is not string message || string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+
+        var package = new Windows.ApplicationModel.DataTransfer.DataPackage();
+        package.SetText(message);
+        Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
+    }
+
     private void CancelJobClicked(object sender, RoutedEventArgs args)
     {
         if ((sender as FrameworkElement)?.Tag is Guid jobId)
@@ -470,10 +562,58 @@ public sealed partial class MainWindow : Window
         QueueSectionSynchronizer.Synchronize(_completedQueueItems, jobs.Where(job => QueueItem.GetSection(job.State) == "Completed").Select(job => _queueItemsById[job.Id]));
         QueueSectionSynchronizer.Synchronize(_failedQueueItems, jobs.Where(job => QueueItem.GetSection(job.State) == "Failed").Select(job => _queueItemsById[job.Id]));
 
+        var activeCount = jobs.Count(job => job.State is DownloadJobState.Queued or DownloadJobState.Probing or DownloadJobState.Downloading or DownloadJobState.PostProcessing);
+        QueueSummaryText.Text = $"QUEUE · {activeCount} ACTIVE";
+        UpdateThroughput(jobs);
+        InProgressCountText.Text = _inProgressQueueItems.Count.ToString();
+        CompletedCountText.Text = _completedQueueItems.Count.ToString();
+        FailedCountText.Text = _failedQueueItems.Count.ToString();
+        QueueCountBadgeText.Text = activeCount.ToString();
+        QueueCountBadge.Visibility = activeCount == 0 ? Visibility.Collapsed : Visibility.Visible;
         QueueEmptyState.Visibility = jobs.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         InProgressQueueSection.Visibility = _inProgressQueueItems.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
         CompletedQueueSection.Visibility = _completedQueueItems.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
         FailedQueueSection.Visibility = _failedQueueItems.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private void UpdateThroughput(IReadOnlyList<DownloadJob> jobs)
+    {
+        var megabytesPerSecond = jobs
+            .Where(job => job.State == DownloadJobState.Downloading)
+            .Sum(job => TransferRate.ToMegabytesPerSecond(job.Progress?.Speed));
+
+        QueueThroughputText.Text = megabytesPerSecond.ToString(megabytesPerSecond >= 100 ? "0" : "0.0");
+        _throughputSamples.Add(megabytesPerSecond);
+        while (_throughputSamples.Count > ThroughputSampleCount)
+        {
+            _throughputSamples.RemoveAt(0);
+        }
+
+        RenderSparkline();
+    }
+
+    private void QueueSparklineSizeChanged(object sender, SizeChangedEventArgs args) => RenderSparkline();
+
+    private void RenderSparkline()
+    {
+        var width = QueueSparklineHost.ActualWidth;
+        var height = QueueSparklineHost.ActualHeight;
+        var points = TransferRate.BuildSparkline(_throughputSamples, width, height);
+        QueueSparkline.Points.Clear();
+        QueueSparklineFill.Points.Clear();
+        if (points.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var (x, y) in points)
+        {
+            QueueSparkline.Points.Add(new Windows.Foundation.Point(x, y));
+            QueueSparklineFill.Points.Add(new Windows.Foundation.Point(x, y));
+        }
+
+        QueueSparklineFill.Points.Add(new Windows.Foundation.Point(points[^1].X, height));
+        QueueSparklineFill.Points.Add(new Windows.Foundation.Point(points[0].X, height));
     }
 
     private async Task RenderHistoryAsync()
@@ -481,13 +621,23 @@ public sealed partial class MainWindow : Window
         try
         {
             var entries = await _history.SearchAsync(HistorySearchBox.Text, null);
-            _historyItems.Clear();
-            foreach (var entry in entries)
+            _historyGroups.Clear();
+            foreach (var group in HistoryDayGroup.Build(entries, DateTime.Today))
             {
-                _historyItems.Add(new HistoryItem(entry));
+                _historyGroups.Add(group);
             }
 
-            HistoryEmptyState.Visibility = _historyItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            var localEntries = entries.Select(entry => (Entry: entry, LocalTime: entry.CreatedAt.LocalDateTime)).ToArray();
+            var today = DateTime.Today;
+            var daysSinceMonday = ((int)today.DayOfWeek + 6) % 7;
+            var weekStart = today.AddDays(-daysSinceMonday);
+            var successCount = entries.Count(entry => entry.State is DownloadJobState.Completed or DownloadJobState.SkippedExisting);
+            HistoryTotalText.Text = entries.Count.ToString();
+            HistoryWeekText.Text = localEntries.Count(item => item.LocalTime >= weekStart).ToString();
+            HistorySuccessRateText.Text = entries.Count == 0
+                ? "—"
+                : $"{Math.Round(successCount * 100d / entries.Count):0}%";
+            HistoryEmptyState.Visibility = _historyGroups.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
         catch (Exception exception)
         {
@@ -513,6 +663,17 @@ public sealed partial class MainWindow : Window
             await _history.ClearAsync();
             await RenderHistoryAsync();
         }
+    }
+
+    private async void RetryHistoryEntryClicked(object sender, RoutedEventArgs args)
+    {
+        if ((sender as FrameworkElement)?.Tag is not string sourceUrl || string.IsNullOrWhiteSpace(sourceUrl))
+        {
+            return;
+        }
+
+        UrlBox.Text = sourceUrl;
+        await SelectNavAsync("download");
     }
 
     private async void OpenHistoryFolderClicked(object sender, RoutedEventArgs args)
@@ -566,23 +727,138 @@ public sealed partial class MainWindow : Window
             DefaultFormatBox.SelectedIndex == 1 ? DownloadFormat.Mp3 : DownloadFormat.Mp4,
             (VideoQuality)Math.Max(DefaultQualityBox.SelectedIndex, 0),
             ThemeBox.SelectedIndex == 1 ? AppTheme.Light : AppTheme.Dark,
-            _backgroundImagePath);
+            _backgroundImagePath,
+            MotionTempoBox.SelectedIndex switch
+            {
+                0 => 0.75,
+                2 => 1.25,
+                _ => 1.0,
+            });
         await _settingsStore.SaveAsync(_settings);
         ApplySettings();
         SettingsMessage.Text = "設定已保存，之後的下載會使用新預設。";
     }
 
+    private void SettingsSelectionChanged(object sender, SelectionChangedEventArgs args) => UpdateSettingsDirtyState();
+
+    private void SettingsTextChanged(object sender, TextChangedEventArgs args) => UpdateSettingsDirtyState();
+
+    private int CountUnsavedSettings()
+    {
+        var changes = 0;
+        if (!string.Equals(DownloadFolderBox.Text.Trim(), _settings.DownloadDirectory, StringComparison.OrdinalIgnoreCase))
+        {
+            changes++;
+        }
+
+        if (DefaultFormatBox.SelectedIndex != (_settings.DefaultFormat == DownloadFormat.Mp3 ? 1 : 0))
+        {
+            changes++;
+        }
+
+        if (DefaultQualityBox.SelectedIndex != (int)_settings.DefaultQuality)
+        {
+            changes++;
+        }
+
+        if (ThemeBox.SelectedIndex != (_settings.Theme == AppTheme.Light ? 1 : 0))
+        {
+            changes++;
+        }
+
+        if (MotionTempoBox.SelectedIndex != MotionTempoIndex(_settings.MotionTempo))
+        {
+            changes++;
+        }
+
+        if (!string.Equals(_backgroundImagePath, _settings.BackgroundImagePath, StringComparison.OrdinalIgnoreCase))
+        {
+            changes++;
+        }
+
+        return changes;
+    }
+
+    private static int MotionTempoIndex(double tempo) => tempo switch
+    {
+        <= 0.85 => 0,
+        >= 1.15 => 2,
+        _ => 1,
+    };
+
+    private void UpdateSettingsDirtyState()
+    {
+        if (_isApplyingSettings)
+        {
+            return;
+        }
+
+        var changes = CountUnsavedSettings();
+        SettingsDirtyText.Text = changes == 0 ? "所有變更都已儲存。" : $"有 {changes} 項未儲存的變更";
+    }
+
     private void ApplySettings()
+    {
+        _isApplyingSettings = true;
+        try
+        {
+            ApplySettingsCore();
+        }
+        finally
+        {
+            _isApplyingSettings = false;
+        }
+
+        UpdateSettingsDirtyState();
+    }
+
+    private void ApplySettingsCore()
     {
         DownloadFolderBox.Text = _settings.DownloadDirectory;
         DefaultFormatBox.SelectedIndex = _settings.DefaultFormat == DownloadFormat.Mp3 ? 1 : 0;
         DefaultQualityBox.SelectedIndex = (int)_settings.DefaultQuality;
         ThemeBox.SelectedIndex = _settings.Theme == AppTheme.Light ? 1 : 0;
+        MotionTempoBox.SelectedIndex = _settings.MotionTempo switch
+        {
+            <= 0.85 => 0,
+            >= 1.15 => 2,
+            _ => 1,
+        };
         FormatBox.SelectedIndex = DefaultFormatBox.SelectedIndex;
         QualityBox.SelectedIndex = DefaultQualityBox.SelectedIndex;
         RootGrid.RequestedTheme = _settings.Theme == AppTheme.Light ? ElementTheme.Light : ElementTheme.Dark;
         _backgroundImagePath = _settings.BackgroundImagePath;
         ApplyBackgroundImage(_backgroundImagePath);
+        UpdateStorageSummary();
+        StartAmbientAnimation();
+    }
+
+    private void UpdateStorageSummary()
+    {
+        try
+        {
+            var fullPath = Path.GetFullPath(_settings.DownloadDirectory);
+            var root = Path.GetPathRoot(fullPath);
+            if (string.IsNullOrWhiteSpace(root))
+            {
+                throw new InvalidOperationException("找不到下載資料夾所在磁碟。");
+            }
+
+            var drive = new DriveInfo(root);
+            var freeGigabytes = drive.AvailableFreeSpace / 1024d / 1024d / 1024d;
+            var usedPercent = drive.TotalSize == 0
+                ? 0
+                : (drive.TotalSize - drive.AvailableFreeSpace) * 100d / drive.TotalSize;
+            StorageRemainingText.Text = freeGigabytes >= 100
+                ? Math.Floor(freeGigabytes).ToString("0")
+                : freeGigabytes.ToString("0.0");
+            StorageUsageBar.Value = Math.Clamp(usedPercent, 0, 100);
+        }
+        catch (Exception)
+        {
+            StorageRemainingText.Text = "—";
+            StorageUsageBar.Value = 0;
+        }
     }
 
     private async Task PlayPageEntranceAsync(string? tag)
@@ -602,14 +878,22 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        AnimateOpacity(title, TimeSpan.Zero);
-        AnimateOpacity(subtitle, TimeSpan.FromMilliseconds(60));
+        AnimatePageTitle(title, 0);
+        AnimateOpacity(subtitle, 60);
         var delay = 120;
         foreach (var element in content)
         {
             if (element.Visibility == Visibility.Visible)
             {
-                AnimateSlideUp(element, TimeSpan.FromMilliseconds(delay));
+                if (tag == "settings")
+                {
+                    AnimateSlideFromRight(element, delay, 22, 400);
+                }
+                else
+                {
+                    AnimateSlideUp(element, delay);
+                }
+
                 delay += 55;
             }
         }
@@ -619,8 +903,8 @@ public sealed partial class MainWindow : Window
 
     private (UIElement Title, UIElement Subtitle, IReadOnlyList<UIElement> Content) GetPageEntranceElements(string? tag) => tag switch
     {
-        "queue" => (QueuePageTitle, QueuePageSubtitle, [QueueEmptyState]),
-        "history" => (HistoryPageTitle, HistoryPageSubtitle, [HistoryControls, HistoryEmptyState]),
+        "queue" => (QueuePageTitle, QueuePageSubtitle, [QueueBoard]),
+        "history" => (HistoryPageTitle, HistoryPageSubtitle, [HistoryControls, HistoryStatsPanel, HistoryEmptyState]),
         "settings" => (SettingsPageTitle, SettingsPageSubtitle, [DownloadDefaultsCard, AppearanceCard, SettingsSavePanel]),
         _ => (DownloadPageTitle, DownloadPageSubtitle, [DownloadPrimaryCard, ResolvedResultPanel]),
     };
@@ -639,7 +923,7 @@ public sealed partial class MainWindow : Window
             {
                 if (list.ContainerFromItem(item) is UIElement container)
                 {
-                    AnimateSlideUp(container, TimeSpan.FromMilliseconds(delay));
+                    AnimateSlideFromRight(container, delay, 44, 440);
                     delay += 55;
                 }
             }
@@ -685,58 +969,247 @@ public sealed partial class MainWindow : Window
         _ => [],
     };
 
-    private static void AnimateOpacity(UIElement element, TimeSpan delay)
+    private void AnimatePageTitle(UIElement element, double delayMilliseconds)
+    {
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+        var visual = ElementCompositionPreview.GetElementVisual(element);
+        visual.StopAnimation("Opacity");
+        visual.StopAnimation("Translation");
+        visual.Opacity = 0;
+        visual.Properties.InsertVector3("Translation", new Vector3(0, 24, 0));
+
+        var easing = visual.Compositor.CreateCubicBezierEasingFunction(new Vector2(0.34f, 1.56f), new Vector2(0.64f, 1));
+        var opacity = visual.Compositor.CreateScalarKeyFrameAnimation();
+        opacity.InsertKeyFrame(1, 1);
+        opacity.DelayTime = MotionTime(delayMilliseconds);
+        opacity.Duration = MotionTime(220);
+        var translation = visual.Compositor.CreateVector3KeyFrameAnimation();
+        translation.InsertKeyFrame(1, Vector3.Zero, easing);
+        translation.DelayTime = MotionTime(delayMilliseconds);
+        translation.Duration = MotionTime(400);
+        visual.StartAnimation("Opacity", opacity);
+        visual.StartAnimation("Translation", translation);
+    }
+
+    private void AnimateOpacity(UIElement element, double delayMilliseconds)
     {
         var visual = ElementCompositionPreview.GetElementVisual(element);
         visual.StopAnimation("Opacity");
         visual.Opacity = 0;
         var animation = visual.Compositor.CreateScalarKeyFrameAnimation();
         animation.InsertKeyFrame(1, 1);
-        animation.DelayTime = delay;
-        animation.Duration = TimeSpan.FromMilliseconds(160);
+        animation.DelayTime = MotionTime(delayMilliseconds);
+        animation.Duration = MotionTime(160);
         visual.StartAnimation("Opacity", animation);
     }
 
-    private static void AnimateSlideUp(UIElement element, TimeSpan delay)
+    private void AnimateSlideUp(UIElement element, double delayMilliseconds)
     {
-        var visual = ElementCompositionPreview.GetElementVisual(element);
         ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+        var visual = ElementCompositionPreview.GetElementVisual(element);
         visual.StopAnimation("Opacity");
         visual.StopAnimation("Translation");
         visual.Opacity = 0;
-        visual.Properties.InsertVector3("Translation", new Vector3(0, 16, 0));
+        visual.Properties.InsertVector3("Translation", new Vector3(0, 24, 0));
 
         var easing = visual.Compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
         var opacity = visual.Compositor.CreateScalarKeyFrameAnimation();
         opacity.InsertKeyFrame(1, 1, easing);
-        opacity.DelayTime = delay;
-        opacity.Duration = TimeSpan.FromMilliseconds(220);
+        opacity.DelayTime = MotionTime(delayMilliseconds);
+        opacity.Duration = MotionTime(220);
         var translation = visual.Compositor.CreateVector3KeyFrameAnimation();
         translation.InsertKeyFrame(1, Vector3.Zero, easing);
-        translation.DelayTime = delay;
-        translation.Duration = TimeSpan.FromMilliseconds(220);
+        translation.DelayTime = MotionTime(delayMilliseconds);
+        translation.Duration = MotionTime(220);
         visual.StartAnimation("Opacity", opacity);
         visual.StartAnimation("Translation", translation);
     }
 
+    private void AnimateSlideFromRight(UIElement element, double delayMilliseconds, float offset, double durationMilliseconds)
+    {
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+        var visual = ElementCompositionPreview.GetElementVisual(element);
+        visual.StopAnimation("Opacity");
+        visual.StopAnimation("Translation");
+        visual.Opacity = 0;
+        visual.Properties.InsertVector3("Translation", new Vector3(offset, 0, 0));
+
+        var easing = visual.Compositor.CreateCubicBezierEasingFunction(new Vector2(0.34f, 1.56f), new Vector2(0.64f, 1));
+        var opacity = visual.Compositor.CreateScalarKeyFrameAnimation();
+        opacity.InsertKeyFrame(1, 1);
+        opacity.DelayTime = MotionTime(delayMilliseconds);
+        opacity.Duration = MotionTime(180);
+        var translation = visual.Compositor.CreateVector3KeyFrameAnimation();
+        translation.InsertKeyFrame(1, Vector3.Zero, easing);
+        translation.DelayTime = MotionTime(delayMilliseconds);
+        translation.Duration = MotionTime(durationMilliseconds);
+        visual.StartAnimation("Opacity", opacity);
+        visual.StartAnimation("Translation", translation);
+    }
+
+    private TimeSpan MotionTime(double milliseconds) =>
+        TimeSpan.FromMilliseconds(milliseconds * Math.Clamp(_settings.MotionTempo, 0.4, 2));
+
     private static void SetImmediatelyVisible(UIElement element)
     {
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
         var visual = ElementCompositionPreview.GetElementVisual(element);
         visual.StopAnimation("Opacity");
         visual.StopAnimation("Translation");
         visual.Opacity = 1;
+        visual.Properties.InsertVector3("Translation", Vector3.Zero);
+    }
+
+    private void StartAmbientAnimation()
+    { StopAmbientAnimation(AuroraOne); StopAmbientAnimation(AuroraTwo); StopAmbientAnimation(AuroraThree); StopAmbientAnimation(InProgressStatusDot); StopAmbientAnimation(UrlGlow);
+        if (!_uiSettings.AnimationsEnabled)
+        {
+            UrlGlow.Opacity = 0.5;
+            return;
+        }
+
+        StartAmbientDrift(AuroraOne, new Vector3(46, 30, 0), MotionTime(16000));
+        StartAmbientDrift(AuroraTwo, new Vector3(-38, -24, 0), MotionTime(19000));
+        StartAmbientDrift(AuroraThree, new Vector3(-30, 26, 0), MotionTime(22000));
+        StartStatusPulse(InProgressStatusDot);
+        StartGlowPulse(UrlGlow);
+    }
+
+    private static void StartAmbientDrift(UIElement element, Vector3 destination, TimeSpan duration)
+    {
+        var visual = ElementCompositionPreview.GetElementVisual(element);
         ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+        visual.Opacity = 0.82f;
+        var animation = visual.Compositor.CreateVector3KeyFrameAnimation();
+        animation.InsertKeyFrame(0, Vector3.Zero);
+        animation.InsertKeyFrame(0.5f, destination);
+        animation.InsertKeyFrame(1, Vector3.Zero);
+        animation.Duration = duration;
+        animation.IterationBehavior = AnimationIterationBehavior.Forever;
+        visual.StartAnimation("Translation", animation);
+    }
+
+    private void StartStatusPulse(UIElement element)
+    {
+        var visual = ElementCompositionPreview.GetElementVisual(element);
+        visual.Opacity = 1;
+        var animation = visual.Compositor.CreateScalarKeyFrameAnimation();
+        animation.InsertKeyFrame(0, 0.35f);
+        animation.InsertKeyFrame(0.5f, 1);
+        animation.InsertKeyFrame(1, 0.35f);
+        animation.Duration = MotionTime(1050);
+        animation.IterationBehavior = AnimationIterationBehavior.Forever;
+        visual.StartAnimation("Opacity", animation);
+    }
+
+    private void StartGlowPulse(UIElement element)
+    {
+        var visual = ElementCompositionPreview.GetElementVisual(element);
+        var animation = visual.Compositor.CreateScalarKeyFrameAnimation();
+        var easing = visual.Compositor.CreateCubicBezierEasingFunction(new Vector2(0.42f, 0), new Vector2(0.58f, 1));
+        animation.InsertKeyFrame(0, 0.5f, easing);
+        animation.InsertKeyFrame(0.5f, 0.9f, easing);
+        animation.InsertKeyFrame(1, 0.5f, easing);
+        animation.Duration = MotionTime(3200);
+        animation.IterationBehavior = AnimationIterationBehavior.Forever;
+        visual.StartAnimation("Opacity", animation);
+    }
+
+    private void ProgressShimmerLoaded(object sender, RoutedEventArgs args)
+    {
+        if (sender is FrameworkElement element)
+        {
+            StartProgressShimmer(element);
+        }
+    }
+
+    private void ProgressTrackSizeChanged(object sender, SizeChangedEventArgs args)
+    {
+        if (sender is Border { Child: Grid grid })
+        {
+            foreach (var shimmer in grid.Children.OfType<Microsoft.UI.Xaml.Shapes.Rectangle>())
+            {
+                StartProgressShimmer(shimmer);
+            }
+        }
+    }
+
+    private void StartProgressShimmer(FrameworkElement element)
+    {
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+        var visual = ElementCompositionPreview.GetElementVisual(element);
+        visual.StopAnimation("Translation");
+        var trackWidth = (float)((element.Parent as FrameworkElement)?.ActualWidth ?? 0);
+        if (trackWidth <= 0 && Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(element) is FrameworkElement ancestor)
+        {
+            trackWidth = (float)ancestor.ActualWidth;
+        }
+
+        if (!_uiSettings.AnimationsEnabled || trackWidth <= 0)
+        {
+            visual.Properties.InsertVector3("Translation", Vector3.Zero);
+            element.Opacity = 0;
+            return;
+        }
+
+        element.Opacity = 1;
+        var travel = trackWidth + (float)element.Width;
+        var animation = visual.Compositor.CreateVector3KeyFrameAnimation();
+        var easing = visual.Compositor.CreateCubicBezierEasingFunction(new Vector2(0.42f, 0), new Vector2(0.58f, 1));
+        animation.InsertKeyFrame(0, new Vector3(-(float)element.Width, 0, 0));
+        animation.InsertKeyFrame(1, new Vector3(travel, 0, 0), easing);
+        animation.Duration = MotionTime(2100);
+        animation.IterationBehavior = AnimationIterationBehavior.Forever;
+        visual.StartAnimation("Translation", animation);
+    }
+
+    private static void StopAmbientAnimation(UIElement element)
+    {
+        // Translation has to be enabled before it can be stopped; Composition rejects the
+        // property name outright on an element that has never opted in.
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+        var visual = ElementCompositionPreview.GetElementVisual(element);
+        visual.StopAnimation("Opacity");
+        visual.StopAnimation("Translation");
+        visual.Opacity = 1;
         visual.Properties.InsertVector3("Translation", Vector3.Zero);
     }
 
     private void RootGridSizeChanged(object sender, SizeChangedEventArgs args)
     {
+        var compactSidebar = args.NewSize.Width < 900;
+        SidebarColumn.Width = new GridLength(compactSidebar ? 56 : 196);
+        SidebarWordmark.Visibility = compactSidebar ? Visibility.Collapsed : Visibility.Visible;
+        StorageCard.Visibility = compactSidebar ? Visibility.Collapsed : Visibility.Visible;
+        NavDownloadLabel.Visibility = compactSidebar ? Visibility.Collapsed : Visibility.Visible;
+        NavQueueLabel.Visibility = compactSidebar ? Visibility.Collapsed : Visibility.Visible;
+        NavHistoryLabel.Visibility = compactSidebar ? Visibility.Collapsed : Visibility.Visible;
+        NavSettingsLabel.Visibility = compactSidebar ? Visibility.Collapsed : Visibility.Visible;
+        QueueCountBadge.Visibility = compactSidebar || QueueCountBadgeText.Text == "0"
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+
         var narrow = args.NewSize.Width < 780;
         OptionsPanel.Orientation = narrow ? Orientation.Vertical : Orientation.Horizontal;
-        SettingsOptionsPanel.Orientation = narrow ? Orientation.Vertical : Orientation.Horizontal;
-        CookieBox.Width = narrow ? double.NaN : 230;
-        FormatBox.Width = narrow ? double.NaN : 160;
-        QualityBox.Width = narrow ? double.NaN : 160;
+        CookieBox.Width = narrow ? double.NaN : 245;
+        FormatBox.Width = narrow ? double.NaN : 150;
+        QualityBox.Width = narrow ? double.NaN : 150;
+
+        var stackedQueue = args.NewSize.Width < 1050;
+        QueueInProgressColumn.Width = new GridLength(1, GridUnitType.Star);
+        QueueCompletedColumn.Width = stackedQueue ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+        QueueFailedColumn.Width = stackedQueue ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+        QueuePrimaryRow.Height = new GridLength(1, GridUnitType.Star);
+        QueueSecondaryRow.Height = stackedQueue ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+        QueueTertiaryRow.Height = stackedQueue ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+        Grid.SetColumn(InProgressQueueSection, 0);
+        Grid.SetColumn(CompletedQueueSection, stackedQueue ? 0 : 1);
+        Grid.SetColumn(FailedQueueSection, stackedQueue ? 0 : 2);
+        Grid.SetRow(InProgressQueueSection, 0);
+        Grid.SetRow(CompletedQueueSection, stackedQueue ? 1 : 0);
+        Grid.SetRow(FailedQueueSection, stackedQueue ? 2 : 0);
+        Grid.SetColumnSpan(QueueEmptyState, stackedQueue ? 1 : 3);
+        Grid.SetRowSpan(QueueEmptyState, stackedQueue ? 3 : 1);
     }
 
     private void ShowError(string title, string message) => ShowStatus(title, UserFacingErrorMapper.Map(message), InfoBarSeverity.Error, false);
