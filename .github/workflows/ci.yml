@@ -27,10 +27,15 @@ jobs:
           dotnet-version: 10.0.x
       - name: Restore locked dependencies
         run: dotnet restore $env:SOLUTION --locked-mode
-      - name: Build x64 Release
-        run: dotnet build $env:SOLUTION -c Release -p:Platform=x64 --no-restore
+      # StreamCrate.sln maps every project's Release|x64 to Release|Any CPU, so a solution build
+      # writes to bin/Release/. Passing -p:Platform=x64 to dotnet test invokes the project
+      # directly, where the property does apply, and it then looks for the assembly under
+      # bin/x64/Release/ and fails with "test source file ... was not found". The app project
+      # pins its own RuntimeIdentifier, so no platform property is needed here.
+      - name: Build Release
+        run: dotnet build $env:SOLUTION -c Release --no-restore
       - name: Run tests
-        run: dotnet test $env:TEST_PROJECT -c Release -p:Platform=x64 --no-build --no-restore
+        run: dotnet test $env:TEST_PROJECT -c Release --no-build --no-restore
 
   package-release:
     if: startsWith(github.ref, 'refs/tags/v')
