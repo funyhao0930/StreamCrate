@@ -47,8 +47,17 @@ internal sealed class QueueItem : ObservableObject
     public double ProgressPercent
     {
         get => _progressPercent;
-        private set => SetProperty(ref _progressPercent, value);
+        private set
+        {
+            if (SetProperty(ref _progressPercent, value))
+            {
+                OnPropertyChanged(nameof(ProgressPercentText));
+            }
+        }
     }
+
+    /// <summary>Percent shown beside the bar, matching the design's "24%" readout.</summary>
+    public string ProgressPercentText => $"{Math.Round(_progressPercent):0}%";
 
     private string _progressDetails = string.Empty;
     public string ProgressDetails
@@ -174,6 +183,7 @@ internal sealed class HistoryItem
         SourceUrl = entry.SourceUrl.ToString();
         IsFailed = entry.State is DownloadJobState.Failed;
         Indent = new Thickness(indent, 0, 0, 0);
+        SizeText = DescribeSize(entry.OutputPath);
     }
 
     public string Title { get; }
@@ -182,6 +192,40 @@ internal sealed class HistoryItem
     public string SourceUrl { get; }
     public bool IsFailed { get; }
     public Thickness Indent { get; }
+    public string SizeText { get; }
+
+    /// <summary>
+    /// Bytes on disk for the row, or 0 when the file is gone; also feeds the "佔用空間" metric.
+    /// </summary>
+    public static long SizeOnDisk(string outputPath)
+    {
+        try
+        {
+            return File.Exists(outputPath) ? new FileInfo(outputPath).Length : 0;
+        }
+        catch (IOException)
+        {
+            return 0;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return 0;
+        }
+    }
+
+    private static string DescribeSize(string outputPath)
+    {
+        var bytes = SizeOnDisk(outputPath);
+        if (bytes <= 0)
+        {
+            return string.Empty;
+        }
+
+        var megabytes = bytes / 1024d / 1024d;
+        return megabytes >= 1024
+            ? $"{megabytes / 1024:0.#} GB"
+            : $"{megabytes:0} MB";
+    }
 
     private static string FormatText(DownloadFormat format) => format == DownloadFormat.Mp3 ? "MP3" : "MP4";
 }

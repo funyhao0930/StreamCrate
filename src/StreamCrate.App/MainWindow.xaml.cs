@@ -45,7 +45,12 @@ public sealed partial class MainWindow : Window
     // loading (MotionTempoBox carries SelectedIndex="1"), cannot touch controls that do not
     // exist yet. ApplySettings clears it once the window is fully built.
     private bool _isApplyingSettings = true;
-    private const float NavItemHeight = 40f;
+    private const float NavItemHeight = 43f;
+    private SegmentedSelector _formatSegments = null!;
+    private SegmentedSelector _qualitySegments = null!;
+    private SegmentedSelector _defaultFormatSegments = null!;
+    private SegmentedSelector _defaultQualitySegments = null!;
+    private SegmentedSelector _themeSegments = null!;
 
     public MainWindow()
     {
@@ -58,6 +63,7 @@ public sealed partial class MainWindow : Window
         _history = new SqliteHistoryStore(Path.Combine(dataDirectory, "history.db"));
         _queue = new DownloadQueueService(ExecuteDownloadAsync);
         _queue.JobChanged += QueueJobChanged;
+        BuildSegmentedSelectors();
         InProgressQueueList.ItemsSource = _inProgressQueueItems;
         CompletedQueueList.ItemsSource = _completedQueueItems;
         FailedQueueList.ItemsSource = _failedQueueItems;
@@ -171,6 +177,39 @@ public sealed partial class MainWindow : Window
         NavIndicator.Width = Math.Max(args.NewSize.Width, 0);
         MoveNavIndicator(NavIndexOf(_selectedNavTag), animate: false);
     }
+
+    private void BuildSegmentedSelectors()
+    {
+        _formatSegments = new SegmentedSelector(SegmentedSelectorKind.Accent, FormatMp4Button, FormatMp3Button);
+        _qualitySegments = new SegmentedSelector(
+            SegmentedSelectorKind.Chip,
+            QualityBestButton,
+            Quality2160Button,
+            Quality1440Button,
+            Quality1080Button,
+            Quality720Button);
+        _defaultFormatSegments = new SegmentedSelector(SegmentedSelectorKind.Accent, DefaultFormatMp4Button, DefaultFormatMp3Button);
+        _defaultQualitySegments = new SegmentedSelector(
+            SegmentedSelectorKind.Chip,
+            DefaultQualityBestButton,
+            DefaultQuality2160Button,
+            DefaultQuality1440Button,
+            DefaultQuality1080Button,
+            DefaultQuality720Button);
+        _themeSegments = new SegmentedSelector(SegmentedSelectorKind.Neutral, ThemeDarkButton, ThemeLightButton);
+
+        _formatSegments.SelectedIndex = 0;
+        _qualitySegments.SelectedIndex = 0;
+        _defaultFormatSegments.SelectedIndex = 0;
+        _defaultQualitySegments.SelectedIndex = 0;
+        _themeSegments.SelectedIndex = 0;
+
+        _defaultFormatSegments.SelectionChanged += SettingsSegmentChanged;
+        _defaultQualitySegments.SelectionChanged += SettingsSegmentChanged;
+        _themeSegments.SelectionChanged += SettingsSegmentChanged;
+    }
+
+    private void SettingsSegmentChanged(object? sender, EventArgs args) => UpdateSettingsDirtyState();
 
     private void MoveNavIndicator(int index, bool animate = true)
     {
@@ -331,8 +370,8 @@ public sealed partial class MainWindow : Window
 
     private IReadOnlyList<DownloadRequest> CreateQueuedRequests()
     {
-        var format = FormatBox.SelectedIndex == 1 ? DownloadFormat.Mp3 : DownloadFormat.Mp4;
-        var quality = (VideoQuality)Math.Max(QualityBox.SelectedIndex, 0);
+        var format = _formatSegments.SelectedIndex == 1 ? DownloadFormat.Mp3 : DownloadFormat.Mp4;
+        var quality = (VideoQuality)Math.Max(_qualitySegments.SelectedIndex, 0);
         if (_playlistSelection is not null)
         {
             return _playlistSelection.CreateRequests(_settings.DownloadDirectory, format, quality, _probedCookies);
@@ -570,10 +609,14 @@ public sealed partial class MainWindow : Window
         FailedCountText.Text = _failedQueueItems.Count.ToString();
         QueueCountBadgeText.Text = activeCount.ToString();
         QueueCountBadge.Visibility = activeCount == 0 ? Visibility.Collapsed : Visibility.Visible;
-        QueueEmptyState.Visibility = jobs.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        InProgressQueueSection.Visibility = _inProgressQueueItems.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
-        CompletedQueueSection.Visibility = _completedQueueItems.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
-        FailedQueueSection.Visibility = _failedQueueItems.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        // The design keeps the board as three standing columns; only a completely empty queue
+        // swaps in the placeholder, so a single job no longer collapses the layout to one column.
+        var hasJobs = jobs.Count > 0;
+        QueueEmptyState.Visibility = hasJobs ? Visibility.Collapsed : Visibility.Visible;
+        var sectionVisibility = hasJobs ? Visibility.Visible : Visibility.Collapsed;
+        InProgressQueueSection.Visibility = sectionVisibility;
+        CompletedQueueSection.Visibility = sectionVisibility;
+        FailedQueueSection.Visibility = sectionVisibility;
     }
 
     private void UpdateThroughput(IReadOnlyList<DownloadJob> jobs)
@@ -638,10 +681,32 @@ public sealed partial class MainWindow : Window
                 ? "—"
                 : $"{Math.Round(successCount * 100d / entries.Count):0}%";
             HistoryEmptyState.Visibility = _historyGroups.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            await UpdateHistoryStorageAsync(entries);
         }
         catch (Exception exception)
         {
             ShowError("無法讀取歷史紀錄", exception.Message);
+        }
+    }
+
+    /// <summary>
+    /// Sums what the kept downloads still occupy on disk. Files the user has since moved or deleted
+    /// simply count as zero, so the metric tracks real usage rather than what history remembers.
+    /// </summary>
+    private async Task UpdateHistoryStorageAsync(IReadOnlyList<HistoryEntry> entries)
+    {
+        var paths = entries.Select(entry => entry.OutputPath).ToArray();
+        var bytes = await Task.Run(() => paths.Sum(HistoryItem.SizeOnDisk));
+        var megabytes = bytes / 1024d / 1024d;
+        if (megabytes >= 1024)
+        {
+            HistoryStorageText.Text = $"{megabytes / 1024:0.#}";
+            HistoryStorageUnitText.Text = "GB";
+        }
+        else
+        {
+            HistoryStorageText.Text = $"{megabytes:0.#}";
+            HistoryStorageUnitText.Text = "MB";
         }
     }
 
@@ -724,9 +789,9 @@ public sealed partial class MainWindow : Window
 
         _settings = new AppSettings(
             directory,
-            DefaultFormatBox.SelectedIndex == 1 ? DownloadFormat.Mp3 : DownloadFormat.Mp4,
-            (VideoQuality)Math.Max(DefaultQualityBox.SelectedIndex, 0),
-            ThemeBox.SelectedIndex == 1 ? AppTheme.Light : AppTheme.Dark,
+            _defaultFormatSegments.SelectedIndex == 1 ? DownloadFormat.Mp3 : DownloadFormat.Mp4,
+            (VideoQuality)Math.Max(_defaultQualitySegments.SelectedIndex, 0),
+            _themeSegments.SelectedIndex == 1 ? AppTheme.Light : AppTheme.Dark,
             _backgroundImagePath,
             MotionTempoBox.SelectedIndex switch
             {
@@ -751,17 +816,17 @@ public sealed partial class MainWindow : Window
             changes++;
         }
 
-        if (DefaultFormatBox.SelectedIndex != (_settings.DefaultFormat == DownloadFormat.Mp3 ? 1 : 0))
+        if (_defaultFormatSegments.SelectedIndex != (_settings.DefaultFormat == DownloadFormat.Mp3 ? 1 : 0))
         {
             changes++;
         }
 
-        if (DefaultQualityBox.SelectedIndex != (int)_settings.DefaultQuality)
+        if (_defaultQualitySegments.SelectedIndex != (int)_settings.DefaultQuality)
         {
             changes++;
         }
 
-        if (ThemeBox.SelectedIndex != (_settings.Theme == AppTheme.Light ? 1 : 0))
+        if (_themeSegments.SelectedIndex != (_settings.Theme == AppTheme.Light ? 1 : 0))
         {
             changes++;
         }
@@ -815,17 +880,17 @@ public sealed partial class MainWindow : Window
     private void ApplySettingsCore()
     {
         DownloadFolderBox.Text = _settings.DownloadDirectory;
-        DefaultFormatBox.SelectedIndex = _settings.DefaultFormat == DownloadFormat.Mp3 ? 1 : 0;
-        DefaultQualityBox.SelectedIndex = (int)_settings.DefaultQuality;
-        ThemeBox.SelectedIndex = _settings.Theme == AppTheme.Light ? 1 : 0;
+        _defaultFormatSegments.SelectedIndex = _settings.DefaultFormat == DownloadFormat.Mp3 ? 1 : 0;
+        _defaultQualitySegments.SelectedIndex = (int)_settings.DefaultQuality;
+        _themeSegments.SelectedIndex = _settings.Theme == AppTheme.Light ? 1 : 0;
         MotionTempoBox.SelectedIndex = _settings.MotionTempo switch
         {
             <= 0.85 => 0,
             >= 1.15 => 2,
             _ => 1,
         };
-        FormatBox.SelectedIndex = DefaultFormatBox.SelectedIndex;
-        QualityBox.SelectedIndex = DefaultQualityBox.SelectedIndex;
+        _formatSegments.SelectedIndex = _defaultFormatSegments.SelectedIndex;
+        _qualitySegments.SelectedIndex = _defaultQualitySegments.SelectedIndex;
         RootGrid.RequestedTheme = _settings.Theme == AppTheme.Light ? ElementTheme.Light : ElementTheme.Dark;
         _backgroundImagePath = _settings.BackgroundImagePath;
         ApplyBackgroundImage(_backgroundImagePath);
@@ -1191,9 +1256,8 @@ public sealed partial class MainWindow : Window
 
         var narrow = args.NewSize.Width < 780;
         OptionsPanel.Orientation = narrow ? Orientation.Vertical : Orientation.Horizontal;
-        CookieBox.Width = narrow ? double.NaN : 245;
-        FormatBox.Width = narrow ? double.NaN : 150;
-        QualityBox.Width = narrow ? double.NaN : 150;
+        OptionsPanel.Spacing = narrow ? 14 : 26;
+        CookieBox.Width = narrow ? double.NaN : 168;
 
         var stackedQueue = args.NewSize.Width < 1050;
         QueueInProgressColumn.Width = new GridLength(1, GridUnitType.Star);

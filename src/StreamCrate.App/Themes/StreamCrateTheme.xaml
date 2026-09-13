@@ -44,6 +44,16 @@
                 <GradientStop Color="#8CFFFFFF" Offset="0.5" />
                 <GradientStop Color="#00FFFFFF" Offset="1" />
             </LinearGradientBrush>
+            <SolidColorBrush x:Key="AppGlassStrongBrush" Color="#F0FFFFFF" />
+            <SolidColorBrush x:Key="AppSunkenBrush" Color="#14070A0C" />
+            <SolidColorBrush x:Key="AppColumnBrush" Color="#0A070A0C" />
+            <SolidColorBrush x:Key="AppUrlFieldBrush" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="AppUrlBorderBrush" Color="#8C17836B" />
+            <SolidColorBrush x:Key="AppSelectedSoftBrush" Color="#2917836B" />
+            <SolidColorBrush x:Key="AppSelectedBorderBrush" Color="#7317836B" />
+            <SolidColorBrush x:Key="AppSelectedTextBrush" Color="#0F6552" />
+            <SolidColorBrush x:Key="AppNavSelectedTextBrush" Color="#0F6552" />
+            <SolidColorBrush x:Key="AppSegmentSelectedBrush" Color="#1F070A0C" />
             <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#F2E8F0F2" />
             <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="#F2E8F0F2" />
         </ResourceDictionary>
@@ -80,15 +90,25 @@
                 <GradientStop Color="#0F4CC9A7" Offset="1" />
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="AppUrlGlowBrush" StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#B34CC9A7" Offset="0" />
-                <GradientStop Color="#4D72B994" Offset="0.5" />
-                <GradientStop Color="#B34CC9A7" Offset="1" />
+                <GradientStop Color="#664CC9A7" Offset="0" />
+                <GradientStop Color="#2672B994" Offset="0.5" />
+                <GradientStop Color="#664CC9A7" Offset="1" />
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="AppShimmerSweepBrush" StartPoint="0,0" EndPoint="1,0">
                 <GradientStop Color="#00FFFFFF" Offset="0" />
                 <GradientStop Color="#73FFFFFF" Offset="0.5" />
                 <GradientStop Color="#00FFFFFF" Offset="1" />
             </LinearGradientBrush>
+            <SolidColorBrush x:Key="AppGlassStrongBrush" Color="#0FFFFFFF" />
+            <SolidColorBrush x:Key="AppSunkenBrush" Color="#4D000000" />
+            <SolidColorBrush x:Key="AppColumnBrush" Color="#42000000" />
+            <SolidColorBrush x:Key="AppUrlFieldBrush" Color="#B804090C" />
+            <SolidColorBrush x:Key="AppUrlBorderBrush" Color="#8C4CC9A7" />
+            <SolidColorBrush x:Key="AppSelectedSoftBrush" Color="#294CC9A7" />
+            <SolidColorBrush x:Key="AppSelectedBorderBrush" Color="#734CC9A7" />
+            <SolidColorBrush x:Key="AppSelectedTextBrush" Color="#ADE8D8" />
+            <SolidColorBrush x:Key="AppNavSelectedTextBrush" Color="#AEF0DD" />
+            <SolidColorBrush x:Key="AppSegmentSelectedBrush" Color="#1FFFFFFF" />
             <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#F207231C" />
             <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="#F207231C" />
         </ResourceDictionary>
@@ -101,13 +121,13 @@
 
     <Style x:Key="PageTitleTextBlockStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppDisplayFontFamily}" />
-        <Setter Property="FontSize" Value="42" />
+        <Setter Property="FontSize" Value="40" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="Foreground" Value="{ThemeResource AppTextBrush}" />
     </Style>
     <Style x:Key="PageAccentTextBlockStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppDisplayFontFamily}" />
-        <Setter Property="FontSize" Value="27" />
+        <Setter Property="FontSize" Value="32" />
         <Setter Property="FontStyle" Value="Italic" />
         <Setter Property="Foreground" Value="{ThemeResource AppPrimaryBrush}" />
         <Setter Property="VerticalAlignment" Value="Bottom" />
@@ -115,53 +135,53 @@
     </Style>
     <Style x:Key="AppTitleTextBlockStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppBodyFontFamily}" />
-        <Setter Property="FontSize" Value="14.25" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{ThemeResource AppTextBrush}" />
     </Style>
     <Style x:Key="PageSubtitleTextBlockStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppBodyFontFamily}" />
-        <Setter Property="FontSize" Value="15.75" />
+        <Setter Property="FontSize" Value="13.5" />
         <Setter Property="Foreground" Value="{ThemeResource AppMutedTextBrush}" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
     <Style x:Key="SectionLabelTextBlockStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppUtilityFontFamily}" />
-        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="FontSize" Value="9.5" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="CharacterSpacing" Value="120" />
+        <Setter Property="CharacterSpacing" Value="160" />
         <Setter Property="Foreground" Value="{ThemeResource AppPrimaryBrush}" />
     </Style>
     <Style x:Key="UtilityTextBlockStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppUtilityFontFamily}" />
-        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="FontSize" Value="10.5" />
         <Setter Property="Foreground" Value="{ThemeResource AppMutedTextBrush}" />
     </Style>
     <Style x:Key="MetricValueTextBlockStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppUtilityFontFamily}" />
-        <Setter Property="FontSize" Value="27" />
-        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontWeight" Value="Medium" />
         <Setter Property="Foreground" Value="{ThemeResource AppTextBrush}" />
     </Style>
     <Style x:Key="DockBorderStyle" TargetType="Border">
         <Setter Property="Background" Value="{ThemeResource AppSurfaceBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource AppBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="18" />
-        <Setter Property="Padding" Value="24" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="20" />
     </Style>
     <Style x:Key="CardBorderStyle" TargetType="Border">
         <Setter Property="Background" Value="{ThemeResource AppSurfaceBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource AppBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="18" />
-        <Setter Property="Padding" Value="19.5" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="13" />
     </Style>
     <Style x:Key="QueueColumnBorderStyle" TargetType="Border">
         <Setter Property="Background" Value="{ThemeResource AppControlBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource AppBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="CornerRadius" Value="16" />
         <Setter Property="Padding" Value="0" />
     </Style>
     <Style x:Key="SettingsGroupBorderStyle" TargetType="Border">
@@ -172,24 +192,24 @@
     </Style>
     <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
         <Setter Property="FontFamily" Value="{StaticResource AppBodyFontFamily}" />
-        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontSize" Value="12" />
         <Setter Property="Background" Value="{ThemeResource AppControlBrush}" />
         <Setter Property="Foreground" Value="{ThemeResource AppTextBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource AppBorderStrongBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="16.5,10.5" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="13,7" />
     </Style>
     <Style x:Key="PrimaryActionButtonStyle" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource AppBodyFontFamily}" />
-        <Setter Property="FontSize" Value="15.75" />
+        <Setter Property="FontSize" Value="13.5" />
         <Setter Property="Background" Value="{ThemeResource AppPrimaryBrush}" />
         <Setter Property="Foreground" Value="{ThemeResource AppOnPrimaryBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource AppPrimaryBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="CornerRadius" Value="10" />
         <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="Padding" Value="21,11" />
+        <Setter Property="Padding" Value="20,10" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="UseSystemFocusVisuals" Value="True" />
@@ -241,16 +261,16 @@
         <Setter Property="Background" Value="{ThemeResource AppControlBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource AppBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="24" />
-        <Setter Property="Padding" Value="15,8" />
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="Padding" Value="14,8" />
     </Style>
     <Style x:Key="CompactComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}">
         <Setter Property="FontFamily" Value="{StaticResource AppBodyFontFamily}" />
-        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="Background" Value="{ThemeResource AppControlBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource AppBorderBrush}" />
-        <Setter Property="CornerRadius" Value="10" />
-        <Setter Property="MinHeight" Value="42" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="MinHeight" Value="34" />
     </Style>
     <Style x:Key="NavItemButtonStyle" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource AppBodyFontFamily}" />
@@ -310,7 +330,7 @@
     </Style>
     <Style x:Key="LinkActionButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
         <Setter Property="FontFamily" Value="{StaticResource AppBodyFontFamily}" />
-        <Setter Property="FontSize" Value="12.75" />
+        <Setter Property="FontSize" Value="11.5" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Foreground" Value="{ThemeResource AppPrimaryBrush}" />
@@ -319,15 +339,136 @@
     </Style>
     <Style x:Key="TimelineDayLabelTextBlockStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppUtilityFontFamily}" />
-        <Setter Property="FontSize" Value="11.25" />
+        <Setter Property="FontSize" Value="10" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="CharacterSpacing" Value="140" />
         <Setter Property="Foreground" Value="{ThemeResource AppFaintTextBrush}" />
     </Style>
     <Style x:Key="MetricCaptionTextBlockStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppUtilityFontFamily}" />
-        <Setter Property="FontSize" Value="11.25" />
-        <Setter Property="CharacterSpacing" Value="120" />
+        <Setter Property="FontSize" Value="9.5" />
+        <Setter Property="CharacterSpacing" Value="140" />
         <Setter Property="Foreground" Value="{ThemeResource AppFaintTextBrush}" />
+    </Style>
+    <Style x:Key="SegmentedHostBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource AppSunkenBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource AppBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="3" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <Style x:Key="SegmentButtonStyle" TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource AppBodyFontFamily}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="Padding" Value="15,0" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{ThemeResource AppMutedTextBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid
+                        x:Name="RootLayer"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="RootLayer.Opacity" Value="0.85" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="RootLayer.Opacity" Value="0.7" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="RootLayer.Opacity" Value="0.4" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Content="{TemplateBinding Content}"
+                            Foreground="{TemplateBinding Foreground}" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="SegmentAccentSelectedButtonStyle" TargetType="Button" BasedOn="{StaticResource SegmentButtonStyle}">
+        <Setter Property="Background" Value="{ThemeResource AppPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource AppOnPrimaryBrush}" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style x:Key="SegmentNeutralSelectedButtonStyle" TargetType="Button" BasedOn="{StaticResource SegmentButtonStyle}">
+        <Setter Property="Background" Value="{ThemeResource AppSegmentSelectedBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource AppTextBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style x:Key="ChipButtonStyle" TargetType="Button" BasedOn="{StaticResource SegmentButtonStyle}">
+        <Setter Property="Height" Value="34" />
+        <Setter Property="Padding" Value="14,0" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="FontFamily" Value="{StaticResource AppUtilityFontFamily}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="BorderBrush" Value="{ThemeResource AppBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style x:Key="ChipSelectedButtonStyle" TargetType="Button" BasedOn="{StaticResource ChipButtonStyle}">
+        <Setter Property="Background" Value="{ThemeResource AppSelectedSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource AppSelectedBorderBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource AppSelectedTextBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource AppBodyFontFamily}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style x:Key="GhostPillButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+        <Setter Property="FontFamily" Value="{StaticResource AppBodyFontFamily}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Padding" Value="14,0" />
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{ThemeResource AppBorderStrongBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{ThemeResource AppMutedTextBrush}" />
+    </Style>
+    <Style x:Key="SmallActionButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+        <Setter Property="FontFamily" Value="{StaticResource AppBodyFontFamily}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Padding" Value="13,0" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{ThemeResource AppBorderStrongBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{ThemeResource AppTextBrush}" />
+    </Style>
+    <Style x:Key="PageHeaderBorderStyle" TargetType="Border">
+        <Setter Property="BorderBrush" Value="{ThemeResource AppBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Padding" Value="34,28,34,22" />
+    </Style>
+    <Style x:Key="ThumbnailBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource AppSurfaceSubtleBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource AppBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="5" />
     </Style>
 </ResourceDictionary>

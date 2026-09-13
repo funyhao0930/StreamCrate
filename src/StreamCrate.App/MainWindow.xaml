@@ -19,42 +19,42 @@
         <Canvas x:Name="AuroraLayer" IsHitTestVisible="False">
             <Ellipse
                 x:Name="AuroraOne"
-                Width="760"
-                Height="760"
-                Canvas.Left="-360"
-                Canvas.Top="-420">
+                Width="1360"
+                Height="1040"
+                Canvas.Left="-526"
+                Canvas.Top="-488">
                 <Ellipse.Fill>
                     <RadialGradientBrush Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
-                        <GradientStop Color="#594CC9A7" Offset="0" />
-                        <GradientStop Color="#244CC9A7" Offset="0.55" />
+                        <GradientStop Color="#8C4CC9A7" Offset="0" />
+                        <GradientStop Color="#004CC9A7" Offset="0.62" />
                         <GradientStop Color="#004CC9A7" Offset="1" />
                     </RadialGradientBrush>
                 </Ellipse.Fill>
             </Ellipse>
             <Ellipse
                 x:Name="AuroraTwo"
-                Width="680"
-                Height="680"
-                Canvas.Left="780"
-                Canvas.Top="310">
+                Width="1400"
+                Height="1040"
+                Canvas.Left="426"
+                Canvas.Top="-424">
                 <Ellipse.Fill>
                     <RadialGradientBrush Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
-                        <GradientStop Color="#3872B994" Offset="0" />
-                        <GradientStop Color="#1872B994" Offset="0.58" />
-                        <GradientStop Color="#0072B994" Offset="1" />
+                        <GradientStop Color="#666C56E0" Offset="0" />
+                        <GradientStop Color="#006C56E0" Offset="0.62" />
+                        <GradientStop Color="#006C56E0" Offset="1" />
                     </RadialGradientBrush>
                 </Ellipse.Fill>
             </Ellipse>
             <Ellipse
                 x:Name="AuroraThree"
-                Width="720"
-                Height="520"
-                Canvas.Left="240"
-                Canvas.Top="520">
+                Width="1800"
+                Height="1200"
+                Canvas.Left="-260"
+                Canvas.Top="296">
                 <Ellipse.Fill>
                     <RadialGradientBrush Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
-                        <GradientStop Color="#2E4CC9A7" Offset="0" />
-                        <GradientStop Color="#144CC9A7" Offset="0.6" />
+                        <GradientStop Color="#424CC9A7" Offset="0" />
+                        <GradientStop Color="#004CC9A7" Offset="0.62" />
                         <GradientStop Color="#004CC9A7" Offset="1" />
                     </RadialGradientBrush>
                 </Ellipse.Fill>
@@ -62,15 +62,15 @@
         </Canvas>
         <Border Background="{ThemeResource AppScrimBrush}" IsHitTestVisible="False" />
 
-        <Grid RowDefinitions="44,*">
-            <Grid x:Name="AppTitleBar" Height="44" Padding="16,0,0,0" VerticalAlignment="Top">
+        <Grid RowDefinitions="48,*">
+            <Grid x:Name="AppTitleBar" Height="48" Padding="18,0,0,0" VerticalAlignment="Top">
                 <StackPanel Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
-                    <Image Source="ms-appx:///Assets/StreamCrateMark.png" Width="18" Height="18" Stretch="Uniform" />
+                    <Image Source="ms-appx:///Assets/StreamCrateMark.png" Width="20" Height="20" Stretch="Uniform" />
                     <TextBlock Text="StreamCrate" Style="{StaticResource AppTitleTextBlockStyle}" />
                 </StackPanel>
             </Grid>
 
-            <Grid Grid.Row="1" Margin="12,0,12,12" ColumnSpacing="12">
+            <Grid Grid.Row="1" Margin="18,0,18,18" ColumnSpacing="18">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="SidebarColumn" Width="196" />
                     <ColumnDefinition Width="*" />
@@ -78,13 +78,13 @@
 
                 <Border
                     x:Name="SidebarCard"
-                    Background="{ThemeResource AppSurfaceBrush}"
+                    Background="{ThemeResource AppGlassStrongBrush}"
                     BorderBrush="{ThemeResource AppBorderBrush}"
                     BorderThickness="1"
                     CornerRadius="20">
-                    <Grid RowDefinitions="Auto,*,Auto" Padding="8,10,8,10">
-                        <StackPanel x:Name="SidebarHeader" Orientation="Horizontal" Spacing="9" Padding="4,0,0,14">
-                            <Border Width="24" Height="24" CornerRadius="8" Background="{ThemeResource AppPrimaryHighlightBrush}">
+                    <Grid RowDefinitions="Auto,*,Auto" Padding="10,14,10,14">
+                        <StackPanel x:Name="SidebarHeader" Orientation="Horizontal" Spacing="10" Padding="6,2,6,16">
+                            <Border Width="24" Height="24" CornerRadius="7" Background="{ThemeResource AppPrimaryHighlightBrush}">
                                 <Image Source="ms-appx:///Assets/StreamCrateMark.png" Stretch="Uniform" Margin="3" />
                             </Border>
                             <TextBlock
@@ -107,34 +107,34 @@
                                     BorderThickness="1"
                                     Opacity="0" />
                             </Canvas>
-                            <StackPanel x:Name="NavItemsPanel" SizeChanged="NavItemsPanelSizeChanged">
+                            <StackPanel x:Name="NavItemsPanel" Spacing="3" SizeChanged="NavItemsPanelSizeChanged">
                                 <Button Tag="download" Style="{StaticResource NavItemButtonStyle}" Click="NavItemClicked">
-                                    <Grid ColumnSpacing="10" HorizontalAlignment="Stretch">
+                                    <Grid ColumnSpacing="12" HorizontalAlignment="Stretch">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="24" />
+                                            <ColumnDefinition Width="16" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <FontIcon Glyph="&#xE710;" FontSize="15" FontFamily="{StaticResource AppSymbolFontFamily}" />
+                                        <FontIcon Glyph="&#xE710;" FontSize="14" FontFamily="{StaticResource AppSymbolFontFamily}" />
                                         <TextBlock x:Name="NavDownloadLabel" Grid.Column="1" Text="新增下載" VerticalAlignment="Center" FontSize="13.5" />
                                     </Grid>
                                 </Button>
                                 <Button Tag="queue" Style="{StaticResource NavItemButtonStyle}" Click="NavItemClicked">
-                                    <Grid ColumnSpacing="10" HorizontalAlignment="Stretch">
+                                    <Grid ColumnSpacing="12" HorizontalAlignment="Stretch">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="24" />
+                                            <ColumnDefinition Width="16" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <FontIcon Glyph="&#xE896;" FontSize="15" FontFamily="{StaticResource AppSymbolFontFamily}" />
-                                        <TextBlock x:Name="NavQueueLabel" Grid.Column="1" Text="下載伨列" VerticalAlignment="Center" FontSize="13.5" />
+                                        <FontIcon Glyph="&#xE896;" FontSize="14" FontFamily="{StaticResource AppSymbolFontFamily}" />
+                                        <TextBlock x:Name="NavQueueLabel" Grid.Column="1" Text="下載佇列" VerticalAlignment="Center" FontSize="13.5" />
                                         <Border
                                             x:Name="QueueCountBadge"
                                             Grid.Column="2"
                                             MinWidth="20"
-                                            Height="17"
-                                            CornerRadius="6"
-                                            Padding="5,0"
+                                            Height="18"
+                                            CornerRadius="9"
+                                            Padding="6,0"
                                             Background="{ThemeResource AppPrimaryBrush}"
                                             VerticalAlignment="Center"
                                             Visibility="Collapsed">
@@ -142,7 +142,7 @@
                                                 x:Name="QueueCountBadgeText"
                                                 Text="0"
                                                 FontFamily="{StaticResource AppUtilityFontFamily}"
-                                                FontSize="10.5"
+                                                FontSize="10"
                                                 FontWeight="SemiBold"
                                                 Foreground="{ThemeResource AppOnPrimaryBrush}"
                                                 HorizontalAlignment="Center"
@@ -151,24 +151,24 @@
                                     </Grid>
                                 </Button>
                                 <Button Tag="history" Style="{StaticResource NavItemButtonStyle}" Click="NavItemClicked">
-                                    <Grid ColumnSpacing="10" HorizontalAlignment="Stretch">
+                                    <Grid ColumnSpacing="12" HorizontalAlignment="Stretch">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="24" />
+                                            <ColumnDefinition Width="16" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <FontIcon Glyph="&#xE81C;" FontSize="15" FontFamily="{StaticResource AppSymbolFontFamily}" />
+                                        <FontIcon Glyph="&#xE81C;" FontSize="14" FontFamily="{StaticResource AppSymbolFontFamily}" />
                                         <TextBlock x:Name="NavHistoryLabel" Grid.Column="1" Text="歷史紀錄" VerticalAlignment="Center" FontSize="13.5" />
                                     </Grid>
                                 </Button>
                                 <Button Tag="settings" Style="{StaticResource NavItemButtonStyle}" Click="NavItemClicked">
-                                    <Grid ColumnSpacing="10" HorizontalAlignment="Stretch">
+                                    <Grid ColumnSpacing="12" HorizontalAlignment="Stretch">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="24" />
+                                            <ColumnDefinition Width="16" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <FontIcon Glyph="&#xE713;" FontSize="15" FontFamily="{StaticResource AppSymbolFontFamily}" />
+                                        <FontIcon Glyph="&#xE713;" FontSize="14" FontFamily="{StaticResource AppSymbolFontFamily}" />
                                         <TextBlock x:Name="NavSettingsLabel" Grid.Column="1" Text="設定" VerticalAlignment="Center" FontSize="13.5" />
                                     </Grid>
                                 </Button>
@@ -178,20 +178,22 @@
                         <Border
                             x:Name="StorageCard"
                             Grid.Row="2"
-                            Padding="12"
-                            Background="{ThemeResource AppControlBrush}"
-                            BorderBrush="{ThemeResource AppBorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="12">
-                            <StackPanel Spacing="7">
-                                <TextBlock x:Name="StorageCaption" Text="磋碟剩餘" Style="{StaticResource MetricCaptionTextBlockStyle}" />
+                            Padding="12,10"
+                            Background="{ThemeResource AppSunkenBrush}"
+                            BorderBrush="Transparent"
+                            BorderThickness="0"
+                            CornerRadius="14">
+                            <StackPanel Spacing="5">
+                                <TextBlock x:Name="StorageCaption" Text="磁碟剩餘" Style="{StaticResource MetricCaptionTextBlockStyle}" />
                                 <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <TextBlock x:Name="StorageRemainingText" Text="—" FontFamily="{StaticResource AppUtilityFontFamily}" FontSize="20.25" Foreground="{ThemeResource AppPrimaryBrush}" />
-                                    <TextBlock x:Name="StorageUnitText" Text="GB" Margin="0,6,0,0" FontFamily="{StaticResource AppUtilityFontFamily}" FontSize="11" Foreground="{ThemeResource AppMutedTextBrush}" />
+                                    <TextBlock x:Name="StorageRemainingText" Text="—" FontFamily="{StaticResource AppUtilityFontFamily}" FontSize="18" Foreground="{ThemeResource AppPrimaryBrush}" />
+                                    <TextBlock x:Name="StorageUnitText" Text="GB" Margin="0,5,0,0" FontFamily="{StaticResource AppUtilityFontFamily}" FontSize="10" Foreground="{ThemeResource AppFaintTextBrush}" />
                                 </StackPanel>
                                 <ProgressBar
                                     x:Name="StorageUsageBar"
+                                    Margin="0,3,0,0"
                                     Height="4"
+                                    CornerRadius="2"
                                     Minimum="0"
                                     Maximum="100"
                                     Value="0"
@@ -205,99 +207,128 @@
                 <Border
                     x:Name="ContentCard"
                     Grid.Column="1"
-                    Background="{ThemeResource AppSurfaceSubtleBrush}"
+                    Background="{ThemeResource AppSurfaceBrush}"
                     BorderBrush="{ThemeResource AppBorderBrush}"
                     BorderThickness="1"
                     CornerRadius="22">
-                    <Grid Padding="30,27" MaxWidth="1260" HorizontalAlignment="Stretch">
+                    <Grid HorizontalAlignment="Stretch">
                         <Grid.Resources>
                             <DataTemplate x:Key="InProgressQueueItemTemplate">
-                                <Border Style="{StaticResource CardBorderStyle}" Margin="0,0,0,9" Padding="13.5">
+                                <Border
+                                    Margin="0,0,0,10"
+                                    Padding="13"
+                                    Background="{ThemeResource AppGlassStrongBrush}"
+                                    BorderBrush="{ThemeResource AppBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
                                     <Border.Transitions>
                                         <TransitionCollection>
                                             <EntranceThemeTransition FromVerticalOffset="24" />
                                         </TransitionCollection>
                                     </Border.Transitions>
-                                    <StackPanel Spacing="9">
-                                        <Grid ColumnSpacing="10.5">
+                                    <StackPanel>
+                                        <Grid ColumnSpacing="10">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="45" />
+                                                <ColumnDefinition Width="44" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <Border
-                                                Width="45"
-                                                Height="30"
-                                                Background="{ThemeResource AppSurfaceSubtleBrush}"
-                                                BorderBrush="{ThemeResource AppBorderBrush}"
-                                                BorderThickness="1"
-                                                CornerRadius="6" />
-                                            <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Text="{Binding Details}" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.25" TextTrimming="CharacterEllipsis" />
+                                            <Border Width="44" Height="26" VerticalAlignment="Top" Style="{StaticResource ThumbnailBorderStyle}" />
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" LineHeight="17" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding Details}" Margin="0,4,0,0" Style="{StaticResource UtilityTextBlockStyle}" FontSize="10.5" TextTrimming="CharacterEllipsis" />
                                             </StackPanel>
                                             <Button
                                                 Grid.Column="2"
                                                 Content="取消"
                                                 Tag="{Binding Id}"
-                                                Padding="9,6"
-                                                FontSize="12"
+                                                Height="22"
+                                                Padding="7,0"
+                                                CornerRadius="6"
+                                                FontSize="11"
+                                                VerticalAlignment="Top"
+                                                Background="Transparent"
+                                                Foreground="{ThemeResource AppFaintTextBrush}"
                                                 Click="CancelJobClicked"
                                                 Visibility="{Binding CancelVisibility}" />
                                         </Grid>
-                                        <Border
-                                            Height="6"
-                                            CornerRadius="3"
-                                            Background="{ThemeResource AppProgressTrackBrush}"
-                                            Visibility="{Binding ProgressVisibility}"
-                                            SizeChanged="ProgressTrackSizeChanged">
-                                            <Grid>
-                                                <ProgressBar
-                                                    Height="6"
-                                                    CornerRadius="3"
-                                                    Value="{Binding ProgressPercent}"
-                                                    Maximum="100"
-                                                    Foreground="{ThemeResource AppPrimaryBrush}"
-                                                    Background="Transparent" />
-                                                <Rectangle
-                                                    Width="72"
-                                                    HorizontalAlignment="Left"
-                                                    Fill="{ThemeResource AppShimmerSweepBrush}"
-                                                    IsHitTestVisible="False"
-                                                    Loaded="ProgressShimmerLoaded" />
-                                            </Grid>
-                                        </Border>
+                                        <Grid Margin="0,12,0,0" ColumnSpacing="10" Visibility="{Binding ProgressVisibility}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border
+                                                Height="5"
+                                                CornerRadius="3"
+                                                VerticalAlignment="Center"
+                                                Background="{ThemeResource AppProgressTrackBrush}"
+                                                SizeChanged="ProgressTrackSizeChanged">
+                                                <Grid>
+                                                    <ProgressBar
+                                                        Height="5"
+                                                        CornerRadius="3"
+                                                        Value="{Binding ProgressPercent}"
+                                                        Maximum="100"
+                                                        Foreground="{ThemeResource AppPrimaryBrush}"
+                                                        Background="Transparent" />
+                                                    <Rectangle
+                                                        Width="72"
+                                                        HorizontalAlignment="Left"
+                                                        Fill="{ThemeResource AppShimmerSweepBrush}"
+                                                        IsHitTestVisible="False"
+                                                        Loaded="ProgressShimmerLoaded" />
+                                                </Grid>
+                                            </Border>
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                Text="{Binding ProgressPercentText}"
+                                                VerticalAlignment="Center"
+                                                FontFamily="{StaticResource AppUtilityFontFamily}"
+                                                FontSize="11"
+                                                FontWeight="SemiBold"
+                                                Foreground="{ThemeResource AppPrimaryBrush}" />
+                                        </Grid>
                                         <TextBlock
                                             Text="{Binding ProgressDetails}"
+                                            Margin="0,8,0,0"
                                             Visibility="{Binding ProgressDetailsVisibility}"
                                             Style="{StaticResource UtilityTextBlockStyle}"
-                                            FontSize="11.25" />
+                                            FontSize="10"
+                                            Foreground="{ThemeResource AppFaintTextBrush}" />
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
 
                             <DataTemplate x:Key="CompletedQueueItemTemplate">
-                                <Border Style="{StaticResource CardBorderStyle}" Margin="0,0,0,9" Padding="13.5">
+                                <Border
+                                    Margin="0,0,0,10"
+                                    Padding="13"
+                                    Background="{ThemeResource AppGlassStrongBrush}"
+                                    BorderBrush="{ThemeResource AppBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
                                     <Border.Transitions>
                                         <TransitionCollection>
                                             <EntranceThemeTransition FromVerticalOffset="24" />
                                         </TransitionCollection>
                                     </Border.Transitions>
-                                    <Grid ColumnSpacing="10.5">
+                                    <Grid ColumnSpacing="11">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="33" />
+                                            <ColumnDefinition Width="26" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="27" Height="27" CornerRadius="15" Background="{ThemeResource AppPrimaryBrush}">
-                                            <TextBlock Text="✓" Foreground="#07231C" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <Border Width="26" Height="26" VerticalAlignment="Top" CornerRadius="13" Background="{ThemeResource AppPrimaryBrush}">
+                                            <FontIcon Glyph="&#xE73E;" FontSize="12" FontFamily="{StaticResource AppSymbolFontFamily}" Foreground="{ThemeResource AppOnPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
-                                        <StackPanel Grid.Column="1" Spacing="4">
-                                            <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding Details}" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.25" TextTrimming="CharacterEllipsis" />
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" LineHeight="17" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Details}" Margin="0,4,0,0" Style="{StaticResource UtilityTextBlockStyle}" FontSize="10.5" TextTrimming="CharacterEllipsis" />
                                             <Button
                                                 Content="開啟檔案位置"
+                                                Margin="0,9,0,0"
                                                 Tag="{Binding OutputPath}"
                                                 Style="{StaticResource LinkActionButtonStyle}"
+                                                Foreground="{ThemeResource AppSelectedTextBrush}"
                                                 Click="OpenQueueFolderClicked" />
                                         </StackPanel>
                                     </Grid>
@@ -306,10 +337,10 @@
 
                             <DataTemplate x:Key="FailedQueueItemTemplate">
                                 <Border
-                                    Margin="0,0,0,9"
-                                    Padding="13.5"
+                                    Margin="0,0,0,10"
+                                    Padding="13"
                                     Background="{ThemeResource AppErrorSoftBrush}"
-                                    BorderBrush="{ThemeResource AppErrorBrush}"
+                                    BorderBrush="{ThemeResource AppErrorBorderBrush}"
                                     BorderThickness="1"
                                     CornerRadius="12">
                                     <Border.Transitions>
@@ -317,50 +348,52 @@
                                             <EntranceThemeTransition FromVerticalOffset="24" />
                                         </TransitionCollection>
                                     </Border.Transitions>
-                                    <StackPanel Spacing="10.5">
+                                    <StackPanel>
                                         <Grid ColumnSpacing="10">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <StackPanel Spacing="3">
-                                                <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Text="{Binding Details}" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.25" Foreground="{ThemeResource AppErrorTextBrush}" />
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" LineHeight="17" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding Details}" Margin="0,4,0,0" Style="{StaticResource UtilityTextBlockStyle}" FontSize="10.5" />
                                             </StackPanel>
-                                            <TextBlock Grid.Column="1" Text="×" FontSize="22" Foreground="{ThemeResource AppErrorBrush}" VerticalAlignment="Top" />
+                                            <FontIcon Grid.Column="1" Glyph="&#xE711;" FontSize="15" FontFamily="{StaticResource AppSymbolFontFamily}" Foreground="{ThemeResource AppErrorBrush}" VerticalAlignment="Top" Margin="0,1,0,0" />
                                         </Grid>
-                                        <Border Background="{ThemeResource AppErrorSoftBrush}" BorderBrush="{ThemeResource AppErrorBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="10.5">
-                                            <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" FontSize="12.75" Foreground="{ThemeResource AppErrorTextBrush}" />
+                                        <Border Margin="0,11,0,0" Background="{ThemeResource AppErrorSoftBrush}" BorderBrush="{ThemeResource AppErrorBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="11,10">
+                                            <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" FontSize="11.5" LineHeight="17" Foreground="{ThemeResource AppErrorTextBrush}" />
                                         </Border>
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <Button Content="重試" Tag="{Binding Id}" Padding="12,6" FontSize="12.75" Click="RetryJobClicked" />
-                                            <Button Content="複製錯誤訊息" Tag="{Binding ErrorMessage}" Padding="12,6" FontSize="12.75" Click="CopyJobErrorClicked" />
+                                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,11,0,0">
+                                            <Button Content="重試" Tag="{Binding Id}" Height="28" Padding="12,0" CornerRadius="8" FontSize="11.5" FontWeight="SemiBold" Background="{ThemeResource AppBorderBrush}" BorderThickness="0" Click="RetryJobClicked" />
+                                            <Button Content="複製錯誤訊息" Tag="{Binding ErrorMessage}" Height="28" Padding="12,0" CornerRadius="8" FontSize="11.5" Background="Transparent" Foreground="{ThemeResource AppMutedTextBrush}" Click="CopyJobErrorClicked" />
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
 
                             <DataTemplate x:Key="HistoryEntryTemplate">
-                                <Border Margin="{Binding Indent}" Style="{StaticResource CardBorderStyle}" Padding="16.5,13.5">
-                                    <Grid ColumnSpacing="12">
+                                <Border
+                                    Margin="{Binding Indent}"
+                                    Padding="16,13"
+                                    Background="{ThemeResource AppSurfaceBrush}"
+                                    BorderBrush="{ThemeResource AppBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="13">
+                                    <Grid ColumnSpacing="16">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="60" />
+                                            <ColumnDefinition Width="52" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Border
-                                            Width="60"
-                                            Height="34"
-                                            Background="{ThemeResource AppSurfaceSubtleBrush}"
-                                            BorderBrush="{ThemeResource AppBorderBrush}"
-                                            BorderThickness="1"
-                                            CornerRadius="6"
-                                            VerticalAlignment="Center" />
-                                        <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Title}" FontSize="15.75" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding Details}" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.25" />
+                                        <Border Width="52" Height="30" VerticalAlignment="Center" Style="{StaticResource ThumbnailBorderStyle}" />
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Details}" Margin="0,3,0,0" Style="{StaticResource UtilityTextBlockStyle}" FontSize="10.5" />
                                         </StackPanel>
-                                        <Button Grid.Column="2" Content="開啟資料夾" Tag="{Binding OutputPath}" VerticalAlignment="Center" Click="OpenHistoryFolderClicked" />
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding SizeText}" VerticalAlignment="Center" FontFamily="{StaticResource AppUtilityFontFamily}" FontSize="11" Foreground="{ThemeResource AppFaintTextBrush}" />
+                                            <Button Content="開啟資料夾" Tag="{Binding OutputPath}" Style="{StaticResource SmallActionButtonStyle}" Click="OpenHistoryFolderClicked" />
+                                        </StackPanel>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -368,59 +401,75 @@
                             <DataTemplate x:Key="HistoryFailedEntryTemplate">
                                 <Border
                                     Margin="{Binding Indent}"
-                                    Padding="16.5,13.5"
+                                    Padding="16,13"
                                     Background="{ThemeResource AppErrorSoftBrush}"
                                     BorderBrush="{ThemeResource AppErrorBorderBrush}"
                                     BorderThickness="1"
-                                    CornerRadius="18">
-                                    <Grid ColumnSpacing="12">
+                                    CornerRadius="13">
+                                    <Grid ColumnSpacing="16">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="60" />
+                                            <ColumnDefinition Width="52" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <Border
-                                            Width="60"
-                                            Height="34"
+                                            Width="52"
+                                            Height="30"
+                                            VerticalAlignment="Center"
                                             Background="{ThemeResource AppErrorSoftBrush}"
                                             BorderBrush="{ThemeResource AppErrorBorderBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="6"
-                                            VerticalAlignment="Center" />
-                                        <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Title}" FontSize="15.75" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding Details}" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.25" Foreground="{ThemeResource AppErrorTextBrush}" />
+                                            CornerRadius="5" />
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Details}" Margin="0,3,0,0" Style="{StaticResource UtilityTextBlockStyle}" FontSize="10.5" Foreground="{ThemeResource AppErrorTextBrush}" />
                                         </StackPanel>
-                                        <Button Grid.Column="2" Content="重新下載" Tag="{Binding SourceUrl}" VerticalAlignment="Center" Click="RetryHistoryEntryClicked" />
+                                        <Button
+                                            Grid.Column="2"
+                                            Content="重新下載"
+                                            Tag="{Binding SourceUrl}"
+                                            Style="{StaticResource SmallActionButtonStyle}"
+                                            BorderBrush="{ThemeResource AppErrorBorderBrush}"
+                                            Foreground="{ThemeResource AppErrorTextBrush}"
+                                            VerticalAlignment="Center"
+                                            Click="RetryHistoryEntryClicked" />
                                     </Grid>
                                 </Border>
                             </DataTemplate>
 
+                            <presentation:HistoryEntryTemplateSelector
+                                x:Key="HistoryEntrySelector"
+                                Normal="{StaticResource HistoryEntryTemplate}"
+                                Failed="{StaticResource HistoryFailedEntryTemplate}" />
+
                             <DataTemplate x:Key="HistoryDayGroupTemplate">
-                                <StackPanel Margin="0,0,0,6">
-                                    <Grid ColumnSpacing="15" Margin="0,9,0,9">
+                                <StackPanel Margin="0,0,0,22">
+                                    <Grid ColumnSpacing="15" Margin="0,0,0,12">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="15" />
+                                            <ColumnDefinition Width="11" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Ellipse
-                                            Width="9"
-                                            Height="9"
+                                            Width="11"
+                                            Height="11"
+                                            Margin="-26,0,0,0"
+                                            HorizontalAlignment="Left"
                                             VerticalAlignment="Center"
                                             Fill="{ThemeResource AppFaintTextBrush}"
                                             Visibility="{Binding PastDotVisibility}" />
                                         <Ellipse
-                                            Width="9"
-                                            Height="9"
+                                            Width="11"
+                                            Height="11"
+                                            Margin="-26,0,0,0"
+                                            HorizontalAlignment="Left"
                                             VerticalAlignment="Center"
                                             Fill="{ThemeResource AppPrimaryBrush}"
                                             Visibility="{Binding TodayDotVisibility}" />
-                                        <TextBlock Grid.Column="1" Text="{Binding Label}" Style="{StaticResource TimelineDayLabelTextBlockStyle}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Margin="-26,0,0,0" Text="{Binding Label}" Style="{StaticResource TimelineDayLabelTextBlockStyle}" VerticalAlignment="Center" />
                                     </Grid>
                                     <ItemsControl
-                                        Margin="30,0,0,0"
                                         ItemsSource="{Binding Items}"
-                                        ItemTemplate="{StaticResource HistoryEntryTemplate}">
+                                        ItemTemplateSelector="{StaticResource HistoryEntrySelector}">
                                         <ItemsControl.ItemContainerTransitions>
                                             <TransitionCollection>
                                                 <EntranceThemeTransition FromHorizontalOffset="44" FromVerticalOffset="0" />
@@ -428,7 +477,7 @@
                                         </ItemsControl.ItemContainerTransitions>
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
-                                                <StackPanel Spacing="9" />
+                                                <StackPanel Spacing="8" />
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
                                     </ItemsControl>
@@ -436,201 +485,268 @@
                             </DataTemplate>
                         </Grid.Resources>
 
-                        <Grid x:Name="DownloadPanel" RowSpacing="18">
+                        <Grid x:Name="DownloadPanel">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <Grid x:Name="DownloadHeaderGrid" ColumnSpacing="18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="3">
-                                    <StackPanel x:Name="DownloadPageTitle" Orientation="Horizontal">
-                                        <TextBlock Text="新增下載" Style="{StaticResource PageTitleTextBlockStyle}" />
-                                        <TextBlock Text="paste a link" Style="{StaticResource PageAccentTextBlockStyle}" />
+                            <Border Style="{StaticResource PageHeaderBorderStyle}">
+                                <Grid x:Name="DownloadHeaderGrid" ColumnSpacing="24">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="7">
+                                        <StackPanel x:Name="DownloadPageTitle" Orientation="Horizontal">
+                                            <TextBlock Text="新增下載" Style="{StaticResource PageTitleTextBlockStyle}" />
+                                            <TextBlock Text="paste a link" Style="{StaticResource PageAccentTextBlockStyle}" />
+                                        </StackPanel>
+                                        <TextBlock x:Name="DownloadPageSubtitle" Text="貼上網址、確認內容，再把它送進本機佇列。" Style="{StaticResource PageSubtitleTextBlockStyle}" />
                                     </StackPanel>
-                                    <TextBlock x:Name="DownloadPageSubtitle" Text="貼上網址、確認內容，再把它送進本機佇列。" Style="{StaticResource PageSubtitleTextBlockStyle}" />
-                                </StackPanel>
-                                <Border Grid.Column="1" Style="{StaticResource QuietPillBorderStyle}" VerticalAlignment="Top" Margin="0,3,0,0">
-                                    <StackPanel Orientation="Horizontal" Spacing="9">
-                                        <ProgressRing x:Name="ToolProgressRing" Width="15" Height="15" IsActive="True" Foreground="{ThemeResource AppPrimaryBrush}" />
-                                        <TextBlock x:Name="ToolStatusText" Text="正在準備下載工具" VerticalAlignment="Center" FontSize="13.5" Foreground="{ThemeResource AppMutedTextBrush}" />
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
+                                    <Border Grid.Column="1" Style="{StaticResource QuietPillBorderStyle}" Background="{ThemeResource AppSunkenBrush}" Padding="11,8,14,8" VerticalAlignment="Top" Margin="0,4,0,0">
+                                        <StackPanel Orientation="Horizontal" Spacing="9">
+                                            <ProgressRing x:Name="ToolProgressRing" Width="15" Height="15" IsActive="True" Foreground="{ThemeResource AppPrimaryBrush}" />
+                                            <TextBlock x:Name="ToolStatusText" Text="正在準備下載工具" VerticalAlignment="Center" FontSize="12.5" Foreground="{ThemeResource AppMutedTextBrush}" />
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Border>
 
-                            <InfoBar x:Name="StatusBar" Grid.Row="1" IsOpen="False" IsClosable="True">
+                            <InfoBar x:Name="StatusBar" Grid.Row="1" Margin="34,14,34,0" IsOpen="False" IsClosable="True">
                                 <InfoBar.ActionButton>
                                     <Button x:Name="RetryToolsButton" Content="重試" Click="RetryToolsClicked" Visibility="Collapsed" />
                                 </InfoBar.ActionButton>
                             </InfoBar>
 
-                            <ScrollViewer Grid.Row="2">
-                                <StackPanel Spacing="15" Padding="0,4,0,24">
-                                    <Border x:Name="DownloadPrimaryCard" Style="{StaticResource DockBorderStyle}">
-                                        <Border.Transitions>
-                                            <TransitionCollection>
-                                                <RepositionThemeTransition />
-                                            </TransitionCollection>
-                                        </Border.Transitions>
-                                        <StackPanel Spacing="18">
-                                            <TextBlock Text="NEW DOWNLOAD" Style="{StaticResource SectionLabelTextBlockStyle}" />
+                            <ScrollViewer Grid.Row="2" Padding="34,26,34,26">
+                                <StackPanel Spacing="22">
+                                    <Border x:Name="DownloadPrimaryCard" Background="Transparent" BorderThickness="0" Padding="0">
+                                        <StackPanel>
+                                            <TextBlock Text="NEW DOWNLOAD" Style="{StaticResource SectionLabelTextBlockStyle}" Margin="0,0,0,12" />
                                             <Grid x:Name="UrlRow">
                                                 <Border
                                                     x:Name="UrlGlow"
-                                                    Margin="-3"
-                                                    CornerRadius="30"
+                                                    Margin="-5"
+                                                    CornerRadius="18"
                                                     BorderBrush="{ThemeResource AppUrlGlowBrush}"
-                                                    BorderThickness="3"
+                                                    BorderThickness="5"
                                                     Opacity="0.5"
                                                     IsHitTestVisible="False" />
+                                                <Border
+                                                    Height="56"
+                                                    CornerRadius="13"
+                                                    Background="{ThemeResource AppUrlFieldBrush}"
+                                                    BorderBrush="{ThemeResource AppUrlBorderBrush}"
+                                                    BorderThickness="1" />
                                                 <TextBox
                                                     x:Name="UrlBox"
-                                                    Height="54"
-                                                    CornerRadius="27"
+                                                    Height="56"
+                                                    CornerRadius="13"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
                                                     Padding="18,0,132,0"
+                                                    VerticalAlignment="Center"
+                                                    VerticalContentAlignment="Center"
                                                     FontFamily="{StaticResource AppUtilityFontFamily}"
-                                                    FontSize="15"
+                                                    FontSize="14.5"
                                                     PlaceholderText="貼上 http 或 https 網址"
-                                                    TextChanged="UrlTextChanged" />
+                                                    TextChanged="UrlTextChanged">
+                                                    <TextBox.Resources>
+                                                        <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
+                                                        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
+                                                        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
+                                                        <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
+                                                        <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
+                                                        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
+                                                    </TextBox.Resources>
+                                                </TextBox>
                                                 <Button
                                                     x:Name="ProbeButton"
                                                     Content="解析網址"
-                                                    MinWidth="108"
+                                                    MinWidth="104"
+                                                    Height="40"
                                                     HorizontalAlignment="Right"
                                                     VerticalAlignment="Center"
-                                                    Margin="0,0,6,0"
-                                                    CornerRadius="21"
-                                                    Padding="18,9"
+                                                    Margin="0,0,8,0"
+                                                    CornerRadius="10"
+                                                    Padding="20,0"
                                                     Style="{StaticResource PrimaryActionButtonStyle}"
                                                     Click="ProbeClicked"
                                                     IsEnabled="False" />
                                             </Grid>
 
-                                            <StackPanel x:Name="OptionsPanel" Orientation="Horizontal" Spacing="18">
-                                                <ComboBox x:Name="CookieBox" Header="登入方式" SelectedIndex="0" Width="245" Style="{StaticResource CompactComboBoxStyle}">
-                                                    <ComboBoxItem Content="不使用 Cookie" Tag="none" />
-                                                    <ComboBoxItem Content="Chrome（Windows 可能無法解密）" Tag="chrome" />
-                                                    <ComboBoxItem Content="Edge（Windows 可能無法解密）" Tag="edge" />
-                                                    <ComboBoxItem Content="Firefox" Tag="firefox" />
-                                                    <ComboBoxItem Content="cookies.txt（瀏覽器匯出的 Netscape 檔）" Tag="file" />
-                                                </ComboBox>
-                                                <ComboBox x:Name="FormatBox" Header="格式" SelectedIndex="0" Width="150" Style="{StaticResource CompactComboBoxStyle}">
-                                                    <ComboBoxItem Content="MP4" />
-                                                    <ComboBoxItem Content="MP3" />
-                                                </ComboBox>
-                                                <ComboBox x:Name="QualityBox" Header="畫質" SelectedIndex="0" Width="150" Style="{StaticResource CompactComboBoxStyle}">
-                                                    <ComboBoxItem Content="最佳" />
-                                                    <ComboBoxItem Content="2160p" />
-                                                    <ComboBoxItem Content="1440p" />
-                                                    <ComboBoxItem Content="1080p" />
-                                                    <ComboBoxItem Content="720p" />
-                                                </ComboBox>
+                                            <StackPanel x:Name="OptionsPanel" Orientation="Horizontal" Spacing="26" Margin="0,20,0,0">
+                                                <StackPanel>
+                                                    <TextBlock Text="登入方式" Style="{StaticResource MetricCaptionTextBlockStyle}" FontWeight="SemiBold" Margin="0,0,0,9" />
+                                                    <ComboBox x:Name="CookieBox" SelectedIndex="0" Width="168" Style="{StaticResource CompactComboBoxStyle}">
+                                                        <ComboBoxItem Content="不使用 Cookie" Tag="none" />
+                                                        <ComboBoxItem Content="Chrome（Windows 可能無法解密）" Tag="chrome" />
+                                                        <ComboBoxItem Content="Edge（Windows 可能無法解密）" Tag="edge" />
+                                                        <ComboBoxItem Content="Firefox" Tag="firefox" />
+                                                        <ComboBoxItem Content="cookies.txt（瀏覽器匯出的 Netscape 檔）" Tag="file" />
+                                                    </ComboBox>
+                                                </StackPanel>
+                                                <StackPanel>
+                                                    <TextBlock Text="格式" Style="{StaticResource MetricCaptionTextBlockStyle}" FontWeight="SemiBold" Margin="0,0,0,9" />
+                                                    <Border Style="{StaticResource SegmentedHostBorderStyle}">
+                                                        <StackPanel Orientation="Horizontal" Spacing="3">
+                                                            <Button x:Name="FormatMp4Button" Content="MP4" Style="{StaticResource SegmentButtonStyle}" />
+                                                            <Button x:Name="FormatMp3Button" Content="MP3" Style="{StaticResource SegmentButtonStyle}" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </StackPanel>
+                                                <StackPanel>
+                                                    <TextBlock Text="畫質" Style="{StaticResource MetricCaptionTextBlockStyle}" FontWeight="SemiBold" Margin="0,0,0,9" />
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <Button x:Name="QualityBestButton" Content="最佳" Style="{StaticResource ChipButtonStyle}" />
+                                                        <Button x:Name="Quality2160Button" Content="2160p" Style="{StaticResource ChipButtonStyle}" />
+                                                        <Button x:Name="Quality1440Button" Content="1440p" Style="{StaticResource ChipButtonStyle}" />
+                                                        <Button x:Name="Quality1080Button" Content="1080p" Style="{StaticResource ChipButtonStyle}" />
+                                                        <Button x:Name="Quality720Button" Content="720p" Style="{StaticResource ChipButtonStyle}" />
+                                                    </StackPanel>
+                                                </StackPanel>
                                             </StackPanel>
-                                            <StackPanel x:Name="ProbeBusyPanel" Orientation="Horizontal" Spacing="9" Visibility="Collapsed">
+                                            <StackPanel x:Name="ProbeBusyPanel" Orientation="Horizontal" Spacing="9" Margin="0,20,0,0" Visibility="Collapsed">
                                                 <ProgressRing Width="18" Height="18" IsActive="True" Foreground="{ThemeResource AppPrimaryBrush}" />
-                                                <TextBlock Text="正在解析網址…" VerticalAlignment="Center" Foreground="{ThemeResource AppMutedTextBrush}" />
+                                                <TextBlock Text="正在解析網址…" VerticalAlignment="Center" FontSize="13.5" Foreground="{ThemeResource AppMutedTextBrush}" />
                                             </StackPanel>
                                         </StackPanel>
                                     </Border>
 
-                                    <Border x:Name="ResolvedResultPanel" Style="{StaticResource CardBorderStyle}" Visibility="Collapsed">
+                                    <Border
+                                        x:Name="ResolvedResultPanel"
+                                        Background="{ThemeResource AppGlassStrongBrush}"
+                                        BorderBrush="{ThemeResource AppBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="16"
+                                        Padding="20"
+                                        Visibility="Collapsed">
                                         <Border.Transitions>
                                             <TransitionCollection>
                                                 <EntranceThemeTransition FromVerticalOffset="24" />
                                             </TransitionCollection>
                                         </Border.Transitions>
-                                        <StackPanel Spacing="12">
-                                            <TextBlock Text="FOUND" Style="{StaticResource SectionLabelTextBlockStyle}" />
-                                            <StackPanel x:Name="SingleResultPanel" Spacing="4">
-                                                <TextBlock x:Name="ResultTitleText" FontSize="18.75" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                                <TextBlock x:Name="ResultMetaText" Foreground="{ThemeResource AppMutedTextBrush}" />
-                                            </StackPanel>
-                                            <StackPanel x:Name="PlaylistResultPanel" Spacing="10" Visibility="Collapsed">
-                                                <Grid ColumnSpacing="12">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <StackPanel Spacing="4">
-                                                        <TextBlock x:Name="PlaylistTitleText" FontSize="18.75" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                                        <TextBlock x:Name="PlaylistCountText" Foreground="{ThemeResource AppMutedTextBrush}" />
+                                        <StackPanel>
+                                            <TextBlock Text="FOUND" Style="{StaticResource SectionLabelTextBlockStyle}" Margin="0,0,0,15" />
+                                            <Grid ColumnSpacing="20">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="176" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border
+                                                    Width="176"
+                                                    Height="99"
+                                                    VerticalAlignment="Top"
+                                                    CornerRadius="10"
+                                                    Background="{ThemeResource AppSurfaceSubtleBrush}"
+                                                    BorderBrush="{ThemeResource AppBorderBrush}"
+                                                    BorderThickness="1">
+                                                    <TextBlock
+                                                        Text="影片縮圖"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Style="{StaticResource UtilityTextBlockStyle}"
+                                                        FontSize="9.5"
+                                                        Foreground="{ThemeResource AppFaintTextBrush}" />
+                                                </Border>
+                                                <StackPanel Grid.Column="1">
+                                                    <StackPanel x:Name="SingleResultPanel">
+                                                        <TextBlock
+                                                            x:Name="ResultTitleText"
+                                                            FontFamily="{StaticResource AppDisplayFontFamily}"
+                                                            FontSize="24"
+                                                            LineHeight="30"
+                                                            TextWrapping="Wrap" />
+                                                        <TextBlock x:Name="ResultMetaText" Margin="0,10,0,0" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.5" />
                                                     </StackPanel>
-                                                    <TextBlock x:Name="SelectedCountText" Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource UtilityTextBlockStyle}" />
-                                                </Grid>
-                                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                                    <Button Content="全部選取" Click="SelectAllPlaylistClicked" />
-                                                    <Button Content="全部取消" Click="ClearPlaylistSelectionClicked" />
+                                                    <StackPanel x:Name="PlaylistResultPanel" Spacing="10" Visibility="Collapsed">
+                                                        <Grid ColumnSpacing="12">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Spacing="4">
+                                                                <TextBlock x:Name="PlaylistTitleText" FontFamily="{StaticResource AppDisplayFontFamily}" FontSize="24" TextWrapping="Wrap" />
+                                                                <TextBlock x:Name="PlaylistCountText" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.5" />
+                                                            </StackPanel>
+                                                            <TextBlock x:Name="SelectedCountText" Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource UtilityTextBlockStyle}" />
+                                                        </Grid>
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <Button Content="全部選取" Click="SelectAllPlaylistClicked" />
+                                                            <Button Content="全部取消" Click="ClearPlaylistSelectionClicked" />
+                                                        </StackPanel>
+                                                        <ScrollViewer MaxHeight="200">
+                                                            <ItemsControl x:Name="PlaylistItems">
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <Grid Padding="0,5" ColumnSpacing="10">
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="Auto" />
+                                                                                <ColumnDefinition Width="*" />
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Center" />
+                                                                            <StackPanel Grid.Column="1" Spacing="2">
+                                                                                <TextBlock Text="{Binding Media.Title}" FontSize="13" TextTrimming="CharacterEllipsis" />
+                                                                                <TextBlock Text="{Binding Media.Duration}" Style="{StaticResource UtilityTextBlockStyle}" FontSize="10.5" />
+                                                                            </StackPanel>
+                                                                        </Grid>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </ScrollViewer>
+                                                    </StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,18,0,0">
+                                                        <Button x:Name="QueueButton" Content="加入下載佇列" Height="38" Padding="20,0" Style="{StaticResource PrimaryActionButtonStyle}" Click="QueueClicked" IsEnabled="False" />
+                                                        <Button x:Name="ViewQueueButton" Content="查看下載佇列" Height="38" Padding="18,0" CornerRadius="10" FontSize="13.5" Background="Transparent" Click="ViewQueueClicked" Visibility="Collapsed" />
+                                                    </StackPanel>
+                                                    <TextBlock x:Name="QueueFeedbackText" Margin="0,10,0,0" FontSize="12.5" Foreground="{ThemeResource AppSuccessBrush}" TextWrapping="Wrap" />
                                                 </StackPanel>
-                                                <ScrollViewer MaxHeight="240">
-                                                    <ItemsControl x:Name="PlaylistItems">
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <Grid Padding="0,6" ColumnSpacing="10">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="Auto" />
-                                                                        <ColumnDefinition Width="*" />
-                                                                    </Grid.ColumnDefinitions>
-                                                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Center" />
-                                                                    <StackPanel Grid.Column="1" Spacing="2">
-                                                                        <TextBlock Text="{Binding Media.Title}" TextTrimming="CharacterEllipsis" />
-                                                                        <TextBlock Text="{Binding Media.Duration}" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.25" />
-                                                                    </StackPanel>
-                                                                </Grid>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                </ScrollViewer>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                                <Button x:Name="QueueButton" Content="加入下載佇列" Style="{StaticResource PrimaryActionButtonStyle}" Click="QueueClicked" IsEnabled="False" />
-                                                <Button x:Name="ViewQueueButton" Content="查看下載佇列" Click="ViewQueueClicked" Visibility="Collapsed" />
-                                            </StackPanel>
-                                            <TextBlock x:Name="QueueFeedbackText" Foreground="{ThemeResource AppSuccessBrush}" TextWrapping="Wrap" />
+                                            </Grid>
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
                             </ScrollViewer>
                         </Grid>
 
-                        <Grid x:Name="QueuePanel" Visibility="Collapsed" RowSpacing="18">
+                        <Grid x:Name="QueuePanel" Visibility="Collapsed">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <Grid x:Name="QueueHeaderGrid" ColumnSpacing="18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="3">
-                                    <TextBlock x:Name="QueueSummaryText" Text="QUEUE · 0 ACTIVE" Style="{StaticResource SectionLabelTextBlockStyle}" />
-                                    <TextBlock x:Name="QueuePageTitle" Text="下載佇列" Style="{StaticResource PageTitleTextBlockStyle}" />
-                                    <TextBlock x:Name="QueuePageSubtitle" Text="一次一筆，清楚掌握每個工作目前的位置。" Style="{StaticResource PageSubtitleTextBlockStyle}" />
-                                </StackPanel>
-                                <StackPanel x:Name="QueueThroughputPanel" Grid.Column="1" Orientation="Horizontal" Spacing="15" Margin="0,17,0,0" VerticalAlignment="Top">
-                                    <StackPanel>
-                                        <TextBlock Text="總傳輸速率" Style="{StaticResource MetricCaptionTextBlockStyle}" />
-                                        <StackPanel Orientation="Horizontal" Spacing="5">
-                                            <TextBlock x:Name="QueueThroughputText" Text="0.0" Style="{StaticResource MetricValueTextBlockStyle}" Foreground="{ThemeResource AppPrimaryBrush}" />
-                                            <TextBlock Text="MB/s" Margin="0,12,0,0" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.25" />
-                                        </StackPanel>
+                            <Border Style="{StaticResource PageHeaderBorderStyle}" Padding="30,28,30,20">
+                                <Grid x:Name="QueueHeaderGrid" ColumnSpacing="28">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Bottom">
+                                        <TextBlock x:Name="QueueSummaryText" Text="QUEUE · 0 ACTIVE" Style="{StaticResource SectionLabelTextBlockStyle}" Margin="0,0,0,9" />
+                                        <TextBlock x:Name="QueuePageTitle" Text="下載佇列" Style="{StaticResource PageTitleTextBlockStyle}" FontSize="36" LineHeight="38" />
+                                        <TextBlock x:Name="QueuePageSubtitle" Text="一次一筆，清楚掌握每個工作目前的位置。" Style="{StaticResource PageSubtitleTextBlockStyle}" FontSize="13" Margin="0,7,0,0" />
                                     </StackPanel>
-                                    <Grid x:Name="QueueSparklineHost" Width="120" Height="40" VerticalAlignment="Center" SizeChanged="QueueSparklineSizeChanged">
-                                        <Polygon x:Name="QueueSparklineFill" Points="0,0" Fill="{ThemeResource AppPrimaryHighlightBrush}" />
-                                        <Polyline x:Name="QueueSparkline" Points="0,0" Stroke="{ThemeResource AppPrimaryBrush}" StrokeThickness="1.5" StrokeLineJoin="Round" />
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
+                                    <StackPanel x:Name="QueueThroughputPanel" Grid.Column="1" Orientation="Horizontal" Spacing="24" VerticalAlignment="Bottom">
+                                        <StackPanel VerticalAlignment="Bottom">
+                                            <TextBlock Text="合計速度" Style="{StaticResource MetricCaptionTextBlockStyle}" Margin="0,0,0,6" />
+                                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                                <TextBlock x:Name="QueueThroughputText" Text="0.0" Style="{StaticResource MetricValueTextBlockStyle}" FontSize="28" Foreground="{ThemeResource AppPrimaryBrush}" />
+                                                <TextBlock Text="MB/s" Margin="0,0,0,4" VerticalAlignment="Bottom" Style="{StaticResource UtilityTextBlockStyle}" FontSize="12" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <Grid x:Name="QueueSparklineHost" Width="130" Height="40" VerticalAlignment="Bottom" SizeChanged="QueueSparklineSizeChanged">
+                                            <Polygon x:Name="QueueSparklineFill" Points="0,0" Fill="{ThemeResource AppPrimaryHighlightBrush}" />
+                                            <Polyline x:Name="QueueSparkline" Points="0,0" Stroke="{ThemeResource AppPrimaryBrush}" StrokeThickness="1.6" StrokeLineJoin="Round" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
 
                             <Grid
                                 x:Name="QueueBoard"
                                 Grid.Row="1"
-                                ColumnSpacing="12"
-                                RowSpacing="12">
+                                Padding="18"
+                                ColumnSpacing="14"
+                                RowSpacing="14">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition x:Name="QueueInProgressColumn" Width="*" />
                                     <ColumnDefinition x:Name="QueueCompletedColumn" Width="*" />
@@ -644,23 +760,23 @@
 
                                 <Border x:Name="QueueEmptyState" Grid.ColumnSpan="3" Style="{StaticResource DockBorderStyle}">
                                     <StackPanel Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <TextBlock Text="目前沒有下載工作" FontSize="18.75" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="解析一個網址後，就能把影片或播放清單加入這裡。" Style="{StaticResource PageSubtitleTextBlockStyle}" TextAlignment="Center" />
+                                        <TextBlock Text="目前沒有下載工作" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="解析一個網址後，就能把影片或播放清單加入這裡。" Style="{StaticResource PageSubtitleTextBlockStyle}" FontSize="12.5" TextAlignment="Center" />
                                     </StackPanel>
                                 </Border>
 
                                 <Border x:Name="InProgressQueueSection" Style="{StaticResource QueueColumnBorderStyle}">
                                     <Grid RowDefinitions="Auto,*">
-                                        <Border Padding="15,12" BorderBrush="{ThemeResource AppBorderBrush}" BorderThickness="0,0,0,1">
+                                        <Border Padding="15,13" BorderBrush="{ThemeResource AppBorderBrush}" BorderThickness="0,0,0,1">
                                             <Grid>
                                                 <StackPanel Orientation="Horizontal" Spacing="9">
-                                                    <Ellipse x:Name="InProgressStatusDot" Width="7.5" Height="7.5" Fill="{ThemeResource AppPrimaryBrush}" VerticalAlignment="Center" />
-                                                    <TextBlock Text="下載中" FontSize="15" FontWeight="SemiBold" />
+                                                    <Ellipse x:Name="InProgressStatusDot" Width="7" Height="7" Fill="{ThemeResource AppPrimaryBrush}" VerticalAlignment="Center" />
+                                                    <TextBlock Text="下載中" FontSize="12.5" FontWeight="SemiBold" />
                                                 </StackPanel>
-                                                <TextBlock x:Name="InProgressCountText" Text="0" HorizontalAlignment="Right" Style="{StaticResource UtilityTextBlockStyle}" />
+                                                <TextBlock x:Name="InProgressCountText" Text="0" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11" Foreground="{ThemeResource AppFaintTextBrush}" />
                                             </Grid>
                                         </Border>
-                                        <ScrollViewer Grid.Row="1" Padding="10.5">
+                                        <ScrollViewer Grid.Row="1" Padding="11">
                                             <ItemsControl x:Name="InProgressQueueList" ItemTemplate="{StaticResource InProgressQueueItemTemplate}">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
@@ -680,16 +796,16 @@
 
                                 <Border x:Name="CompletedQueueSection" Grid.Column="1" Style="{StaticResource QueueColumnBorderStyle}">
                                     <Grid RowDefinitions="Auto,*">
-                                        <Border Padding="15,12" BorderBrush="{ThemeResource AppBorderBrush}" BorderThickness="0,0,0,1">
+                                        <Border Padding="15,13" BorderBrush="{ThemeResource AppBorderBrush}" BorderThickness="0,0,0,1">
                                             <Grid>
                                                 <StackPanel Orientation="Horizontal" Spacing="9">
-                                                    <Ellipse Width="7.5" Height="7.5" Fill="{ThemeResource AppSuccessBrush}" VerticalAlignment="Center" />
-                                                    <TextBlock Text="下載完成" FontSize="15" FontWeight="SemiBold" />
+                                                    <Ellipse Width="7" Height="7" Fill="{ThemeResource AppSuccessBrush}" VerticalAlignment="Center" />
+                                                    <TextBlock Text="下載完成" FontSize="12.5" FontWeight="SemiBold" />
                                                 </StackPanel>
-                                                <TextBlock x:Name="CompletedCountText" Text="0" HorizontalAlignment="Right" Style="{StaticResource UtilityTextBlockStyle}" />
+                                                <TextBlock x:Name="CompletedCountText" Text="0" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11" Foreground="{ThemeResource AppFaintTextBrush}" />
                                             </Grid>
                                         </Border>
-                                        <ScrollViewer Grid.Row="1" Padding="10.5">
+                                        <ScrollViewer Grid.Row="1" Padding="11">
                                             <ItemsControl x:Name="CompletedQueueList" ItemTemplate="{StaticResource CompletedQueueItemTemplate}">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
@@ -709,16 +825,16 @@
 
                                 <Border x:Name="FailedQueueSection" Grid.Column="2" Style="{StaticResource QueueColumnBorderStyle}">
                                     <Grid RowDefinitions="Auto,*">
-                                        <Border Padding="15,12" BorderBrush="{ThemeResource AppBorderBrush}" BorderThickness="0,0,0,1">
+                                        <Border Padding="15,13" BorderBrush="{ThemeResource AppBorderBrush}" BorderThickness="0,0,0,1">
                                             <Grid>
                                                 <StackPanel Orientation="Horizontal" Spacing="9">
-                                                    <Ellipse Width="7.5" Height="7.5" Fill="{ThemeResource AppErrorBrush}" VerticalAlignment="Center" />
-                                                    <TextBlock Text="下載失敗" FontSize="15" FontWeight="SemiBold" />
+                                                    <Ellipse Width="7" Height="7" Fill="{ThemeResource AppErrorBrush}" VerticalAlignment="Center" />
+                                                    <TextBlock Text="下載失敗" FontSize="12.5" FontWeight="SemiBold" />
                                                 </StackPanel>
-                                                <TextBlock x:Name="FailedCountText" Text="0" HorizontalAlignment="Right" Style="{StaticResource UtilityTextBlockStyle}" />
+                                                <TextBlock x:Name="FailedCountText" Text="0" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11" Foreground="{ThemeResource AppFaintTextBrush}" />
                                             </Grid>
                                         </Border>
-                                        <ScrollViewer Grid.Row="1" Padding="10.5">
+                                        <ScrollViewer Grid.Row="1" Padding="11">
                                             <ItemsControl x:Name="FailedQueueList" ItemTemplate="{StaticResource FailedQueueItemTemplate}">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
@@ -738,176 +854,264 @@
                             </Grid>
                         </Grid>
 
-                        <Grid x:Name="HistoryPanel" Visibility="Collapsed" RowSpacing="15">
+                        <Grid x:Name="HistoryPanel" Visibility="Collapsed">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <Grid x:Name="HistoryHeaderGrid" ColumnSpacing="18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="3">
-                                    <StackPanel x:Name="HistoryPageTitle" Orientation="Horizontal">
-                                        <TextBlock Text="歷史紀錄" Style="{StaticResource PageTitleTextBlockStyle}" />
-                                        <TextBlock Text="local only" Style="{StaticResource PageAccentTextBlockStyle}" />
+                            <Border Style="{StaticResource PageHeaderBorderStyle}">
+                                <StackPanel>
+                                    <Grid x:Name="HistoryHeaderGrid" ColumnSpacing="24">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Spacing="7">
+                                            <StackPanel x:Name="HistoryPageTitle" Orientation="Horizontal">
+                                                <TextBlock Text="歷史紀錄" Style="{StaticResource PageTitleTextBlockStyle}" />
+                                                <TextBlock Text="local only" Style="{StaticResource PageAccentTextBlockStyle}" />
+                                            </StackPanel>
+                                            <TextBlock x:Name="HistoryPageSubtitle" Text="只有本機保留、且已去敏的下載結果。" Style="{StaticResource PageSubtitleTextBlockStyle}" />
+                                        </StackPanel>
+                                        <Grid x:Name="HistoryControls" Grid.Column="1" ColumnSpacing="10" VerticalAlignment="Top" Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="226" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border
+                                                Height="36"
+                                                CornerRadius="18"
+                                                Padding="14,0,8,0"
+                                                Background="{ThemeResource AppSunkenBrush}"
+                                                BorderBrush="{ThemeResource AppBorderBrush}"
+                                                BorderThickness="1">
+                                                <Grid ColumnSpacing="9">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="13" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <FontIcon
+                                                        Glyph="&#xE721;"
+                                                        FontSize="12"
+                                                        FontFamily="{StaticResource AppSymbolFontFamily}"
+                                                        Foreground="{ThemeResource AppFaintTextBrush}"
+                                                        VerticalAlignment="Center" />
+                                                    <TextBox
+                                                        x:Name="HistorySearchBox"
+                                                        Grid.Column="1"
+                                                        Background="Transparent"
+                                                        BorderThickness="0"
+                                                        Padding="0"
+                                                        VerticalAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        FontSize="12.5"
+                                                        PlaceholderText="搜尋標題或媒體 ID"
+                                                        TextChanged="HistorySearchChanged">
+                                                        <TextBox.Resources>
+                                                            <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
+                                                            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
+                                                            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
+                                                            <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
+                                                            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
+                                                            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
+                                                        </TextBox.Resources>
+                                                    </TextBox>
+                                                </Grid>
+                                            </Border>
+                                            <Button Grid.Column="1" Content="清除全部" Style="{StaticResource GhostPillButtonStyle}" Click="ClearHistoryClicked" />
+                                        </Grid>
+                                    </Grid>
+
+                                    <StackPanel x:Name="HistoryStatsPanel" Orientation="Horizontal" Spacing="36" Margin="0,24,0,0">
+                                        <StackPanel>
+                                            <TextBlock Text="總下載" Style="{StaticResource MetricCaptionTextBlockStyle}" />
+                                            <TextBlock x:Name="HistoryTotalText" Text="0" Style="{StaticResource MetricValueTextBlockStyle}" Margin="0,4,0,0" />
+                                        </StackPanel>
+                                        <Rectangle Width="1" Fill="{ThemeResource AppBorderBrush}" />
+                                        <StackPanel>
+                                            <TextBlock Text="本週" Style="{StaticResource MetricCaptionTextBlockStyle}" />
+                                            <TextBlock x:Name="HistoryWeekText" Text="0" Style="{StaticResource MetricValueTextBlockStyle}" Margin="0,4,0,0" Foreground="{ThemeResource AppPrimaryBrush}" />
+                                        </StackPanel>
+                                        <Rectangle Width="1" Fill="{ThemeResource AppBorderBrush}" />
+                                        <StackPanel>
+                                            <TextBlock Text="佔用空間" Style="{StaticResource MetricCaptionTextBlockStyle}" />
+                                            <StackPanel Orientation="Horizontal" Spacing="5" Margin="0,4,0,0">
+                                                <TextBlock x:Name="HistoryStorageText" Text="0" Style="{StaticResource MetricValueTextBlockStyle}" />
+                                                <TextBlock x:Name="HistoryStorageUnitText" Text="GB" VerticalAlignment="Bottom" Margin="0,0,0,4" Style="{StaticResource UtilityTextBlockStyle}" FontSize="13" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <Rectangle Width="1" Fill="{ThemeResource AppBorderBrush}" />
+                                        <StackPanel>
+                                            <TextBlock Text="成功率" Style="{StaticResource MetricCaptionTextBlockStyle}" />
+                                            <TextBlock x:Name="HistorySuccessRateText" Text="—" Style="{StaticResource MetricValueTextBlockStyle}" Margin="0,4,0,0" />
+                                        </StackPanel>
                                     </StackPanel>
-                                    <TextBlock x:Name="HistoryPageSubtitle" Text="只有本機保留、且已去敏的下載結果。" Style="{StaticResource PageSubtitleTextBlockStyle}" />
                                 </StackPanel>
-                                <Grid x:Name="HistoryControls" Grid.Column="1" ColumnSpacing="9" VerticalAlignment="Top" Margin="0,3,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="300" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox x:Name="HistorySearchBox" Height="45" PlaceholderText="搜尋標題或媒體 ID" TextChanged="HistorySearchChanged" />
-                                    <Button Grid.Column="1" Content="清除全部" Click="ClearHistoryClicked" />
-                                </Grid>
-                            </Grid>
+                            </Border>
 
-                            <StackPanel x:Name="HistoryStatsPanel" Grid.Row="1" Orientation="Horizontal" Spacing="27" Margin="0,3,0,2">
-                                <StackPanel MinWidth="105" Spacing="3">
-                                    <TextBlock Text="總下載" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.25" />
-                                    <TextBlock x:Name="HistoryTotalText" Text="0" Style="{StaticResource MetricValueTextBlockStyle}" />
-                                </StackPanel>
-                                <Rectangle Width="1" Fill="{ThemeResource AppBorderBrush}" />
-                                <StackPanel MinWidth="105" Spacing="3">
-                                    <TextBlock Text="本週" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.25" />
-                                    <TextBlock x:Name="HistoryWeekText" Text="0" Style="{StaticResource MetricValueTextBlockStyle}" Foreground="{ThemeResource AppPrimaryBrush}" />
-                                </StackPanel>
-                                <Rectangle Width="1" Fill="{ThemeResource AppBorderBrush}" />
-                                <StackPanel MinWidth="105" Spacing="3">
-                                    <TextBlock Text="成功率" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.25" />
-                                    <TextBlock x:Name="HistorySuccessRateText" Text="—" Style="{StaticResource MetricValueTextBlockStyle}" />
-                                </StackPanel>
-                            </StackPanel>
-
-                            <ScrollViewer Grid.Row="2" Padding="0,3,0,24">
-                                <Grid>
-                                    <Border Width="1" Margin="7,0,0,0" HorizontalAlignment="Left" Background="{ThemeResource AppBorderBrush}" />
+                            <ScrollViewer Grid.Row="1" Padding="34,22,34,22">
+                                <Grid Padding="26,0,0,0">
+                                    <Rectangle Width="1" Margin="-21,6,0,0" HorizontalAlignment="Left" Fill="{ThemeResource AppTimelineRuleBrush}" />
                                     <StackPanel>
-                                        <Border x:Name="HistoryEmptyState" Margin="15,0,0,0" Style="{StaticResource DockBorderStyle}">
+                                        <Border x:Name="HistoryEmptyState" Style="{StaticResource DockBorderStyle}">
                                             <StackPanel Spacing="6">
-                                                <TextBlock Text="尚無歷史紀錄" FontSize="18.75" FontWeight="SemiBold" />
-                                                <TextBlock Text="完成、失敗或取消的下載會出現在這裡。" Style="{StaticResource PageSubtitleTextBlockStyle}" />
+                                                <TextBlock Text="尚無歷史紀錄" FontSize="15" FontWeight="SemiBold" />
+                                                <TextBlock Text="完成、失敗或取消的下載會出現在這裡。" Style="{StaticResource PageSubtitleTextBlockStyle}" FontSize="12.5" />
                                             </StackPanel>
                                         </Border>
-                                        <ItemsControl x:Name="HistoryList" Margin="0,0,0,0" ItemTemplate="{StaticResource HistoryDayGroupTemplate}" />
+                                        <ItemsControl x:Name="HistoryList" ItemTemplate="{StaticResource HistoryDayGroupTemplate}" />
                                     </StackPanel>
                                 </Grid>
                             </ScrollViewer>
                         </Grid>
 
-                        <Grid x:Name="SettingsPanel" Visibility="Collapsed" RowSpacing="0">
+                        <Grid x:Name="SettingsPanel" Visibility="Collapsed">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <StackPanel Spacing="3" Margin="0,0,0,15">
-                                <StackPanel x:Name="SettingsPageTitle" Orientation="Horizontal">
-                                    <TextBlock Text="設定" Style="{StaticResource PageTitleTextBlockStyle}" />
-                                    <TextBlock Text="this machine only" Style="{StaticResource PageAccentTextBlockStyle}" />
+                            <Border Style="{StaticResource PageHeaderBorderStyle}" Padding="34,28,34,20">
+                                <StackPanel Spacing="7">
+                                    <StackPanel x:Name="SettingsPageTitle" Orientation="Horizontal">
+                                        <TextBlock Text="設定" Style="{StaticResource PageTitleTextBlockStyle}" />
+                                        <TextBlock Text="this machine only" Style="{StaticResource PageAccentTextBlockStyle}" />
+                                    </StackPanel>
+                                    <TextBlock x:Name="SettingsPageSubtitle" Text="這些偏好只保存在這台電腦。" Style="{StaticResource PageSubtitleTextBlockStyle}" />
                                 </StackPanel>
-                                <TextBlock x:Name="SettingsPageSubtitle" Text="這些偏好只保存在這台電腦。" Style="{StaticResource PageSubtitleTextBlockStyle}" />
-                            </StackPanel>
+                            </Border>
 
-                            <ScrollViewer Grid.Row="1" Padding="0,0,0,18">
-                                <StackPanel MaxWidth="880" HorizontalAlignment="Left">
-                                    <Border x:Name="DownloadDefaultsCard" Style="{StaticResource SettingsGroupBorderStyle}">
+                            <ScrollViewer Grid.Row="1" Padding="34,6,34,6">
+                                <StackPanel MaxWidth="760" HorizontalAlignment="Left">
+                                    <Border x:Name="DownloadDefaultsCard" Background="Transparent" BorderThickness="0" Padding="0">
                                         <StackPanel>
-                                            <Grid Padding="0,18" ColumnSpacing="30">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="165" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="下載資料夾" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" Margin="0,4,0,0" />
-                                                <StackPanel Grid.Column="1" Spacing="9">
-                                                    <TextBox x:Name="DownloadFolderBox" IsReadOnly="True" FontFamily="{StaticResource AppUtilityFontFamily}" TextChanged="SettingsTextChanged" />
-                                                    <Button Content="選擇資料夾" HorizontalAlignment="Left" Click="ChooseDownloadFolderClicked" />
-                                                </StackPanel>
-                                            </Grid>
-                                            <Border BorderBrush="{ThemeResource AppBorderBrush}" BorderThickness="0,1,0,0">
-                                                <StackPanel x:Name="SettingsOptionsPanel">
-                                                    <Grid Padding="0,18" ColumnSpacing="30">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="165" />
-                                                            <ColumnDefinition Width="*" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <TextBlock Text="預設格式" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                                        <ComboBox x:Name="DefaultFormatBox" Grid.Column="1" Width="180" HorizontalAlignment="Left" Style="{StaticResource CompactComboBoxStyle}" SelectionChanged="SettingsSelectionChanged">
-                                                            <ComboBoxItem Content="MP4" />
-                                                            <ComboBoxItem Content="MP3" />
-                                                        </ComboBox>
-                                                    </Grid>
-                                                    <Grid Padding="0,18" ColumnSpacing="30">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="165" />
-                                                            <ColumnDefinition Width="*" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <TextBlock Text="預設畫質" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                                        <ComboBox x:Name="DefaultQualityBox" Grid.Column="1" Width="180" HorizontalAlignment="Left" Style="{StaticResource CompactComboBoxStyle}" SelectionChanged="SettingsSelectionChanged">
-                                                            <ComboBoxItem Content="最佳" />
-                                                            <ComboBoxItem Content="2160p" />
-                                                            <ComboBoxItem Content="1440p" />
-                                                            <ComboBoxItem Content="1080p" />
-                                                            <ComboBoxItem Content="720p" />
-                                                        </ComboBox>
-                                                    </Grid>
-                                                </StackPanel>
+                                            <Border Style="{StaticResource SettingsGroupBorderStyle}">
+                                                <Grid Padding="0,18" ColumnSpacing="26">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="140" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="下載資料夾" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" CharacterSpacing="100" Foreground="{ThemeResource AppFaintTextBrush}" Margin="0,3,0,0" />
+                                                    <StackPanel Grid.Column="1" Spacing="11">
+                                                        <TextBox x:Name="DownloadFolderBox" IsReadOnly="True" FontFamily="{StaticResource AppUtilityFontFamily}" FontSize="13" Background="Transparent" BorderThickness="0" Padding="0" TextChanged="SettingsTextChanged">
+                                                            <TextBox.Resources>
+                                                                <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
+                                                                <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
+                                                                <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
+                                                                <SolidColorBrush x:Key="TextControlBackgroundReadOnly" Color="Transparent" />
+                                                                <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
+                                                                <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
+                                                                <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
+                                                            </TextBox.Resources>
+                                                        </TextBox>
+                                                        <Button Content="選擇資料夾" Height="32" Padding="14,0" CornerRadius="9" Background="{ThemeResource AppSunkenBrush}" HorizontalAlignment="Left" Click="ChooseDownloadFolderClicked" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                            <Border Style="{StaticResource SettingsGroupBorderStyle}">
+                                                <Grid Padding="0,18" ColumnSpacing="26">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="140" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="預設格式" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" CharacterSpacing="100" Foreground="{ThemeResource AppFaintTextBrush}" VerticalAlignment="Center" />
+                                                    <Border Grid.Column="1" Style="{StaticResource SegmentedHostBorderStyle}">
+                                                        <StackPanel Orientation="Horizontal" Spacing="3">
+                                                            <Button x:Name="DefaultFormatMp4Button" Content="MP4" Style="{StaticResource SegmentButtonStyle}" Padding="16,0" />
+                                                            <Button x:Name="DefaultFormatMp3Button" Content="MP3" Style="{StaticResource SegmentButtonStyle}" Padding="16,0" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                            <Border Style="{StaticResource SettingsGroupBorderStyle}">
+                                                <Grid Padding="0,18" ColumnSpacing="26">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="140" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="預設畫質" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" CharacterSpacing="100" Foreground="{ThemeResource AppFaintTextBrush}" VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                                        <Button x:Name="DefaultQualityBestButton" Content="最佳" Style="{StaticResource ChipButtonStyle}" />
+                                                        <Button x:Name="DefaultQuality2160Button" Content="2160p" Style="{StaticResource ChipButtonStyle}" />
+                                                        <Button x:Name="DefaultQuality1440Button" Content="1440p" Style="{StaticResource ChipButtonStyle}" />
+                                                        <Button x:Name="DefaultQuality1080Button" Content="1080p" Style="{StaticResource ChipButtonStyle}" />
+                                                        <Button x:Name="DefaultQuality720Button" Content="720p" Style="{StaticResource ChipButtonStyle}" />
+                                                    </StackPanel>
+                                                </Grid>
                                             </Border>
                                         </StackPanel>
                                     </Border>
 
-                                    <Border x:Name="AppearanceCard" Style="{StaticResource SettingsGroupBorderStyle}">
+                                    <Border x:Name="AppearanceCard" Background="Transparent" BorderThickness="0" Padding="0">
                                         <StackPanel>
-                                            <Grid Padding="0,18" ColumnSpacing="30">
+                                            <Border Style="{StaticResource SettingsGroupBorderStyle}">
+                                                <Grid Padding="0,18" ColumnSpacing="26">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="140" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="主題" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" CharacterSpacing="100" Foreground="{ThemeResource AppFaintTextBrush}" VerticalAlignment="Center" />
+                                                    <Border Grid.Column="1" Style="{StaticResource SegmentedHostBorderStyle}">
+                                                        <StackPanel Orientation="Horizontal" Spacing="3">
+                                                            <Button x:Name="ThemeDarkButton" Style="{StaticResource SegmentButtonStyle}" Padding="14,0">
+                                                                <StackPanel Orientation="Horizontal" Spacing="7">
+                                                                    <Ellipse Width="10" Height="10" Fill="#0B0F12" Stroke="{ThemeResource AppBorderStrongBrush}" StrokeThickness="1" VerticalAlignment="Center" />
+                                                                    <TextBlock Text="深色" VerticalAlignment="Center" />
+                                                                </StackPanel>
+                                                            </Button>
+                                                            <Button x:Name="ThemeLightButton" Style="{StaticResource SegmentButtonStyle}" Padding="14,0">
+                                                                <StackPanel Orientation="Horizontal" Spacing="7">
+                                                                    <Ellipse Width="10" Height="10" Fill="#E8F0F2" VerticalAlignment="Center" />
+                                                                    <TextBlock Text="淺色" VerticalAlignment="Center" />
+                                                                </StackPanel>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                            <Border Style="{StaticResource SettingsGroupBorderStyle}">
+                                                <Grid Padding="0,18" ColumnSpacing="26">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="140" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="動效速度" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" CharacterSpacing="100" Foreground="{ThemeResource AppFaintTextBrush}" VerticalAlignment="Center" />
+                                                    <ComboBox x:Name="MotionTempoBox" Grid.Column="1" Width="180" HorizontalAlignment="Left" SelectedIndex="1" Style="{StaticResource CompactComboBoxStyle}" SelectionChanged="SettingsSelectionChanged">
+                                                        <ComboBoxItem Content="快速 · 0.75×" />
+                                                        <ComboBoxItem Content="標準 · 1.00×" />
+                                                        <ComboBoxItem Content="舒緩 · 1.25×" />
+                                                    </ComboBox>
+                                                </Grid>
+                                            </Border>
+                                            <Grid Padding="0,18,0,20" ColumnSpacing="26">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="165" />
+                                                    <ColumnDefinition Width="140" />
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Text="主題" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                                <ComboBox x:Name="ThemeBox" Grid.Column="1" Width="180" HorizontalAlignment="Left" Style="{StaticResource CompactComboBoxStyle}" SelectionChanged="SettingsSelectionChanged">
-                                                    <ComboBoxItem Content="深色" />
-                                                    <ComboBoxItem Content="淺色" />
-                                                </ComboBox>
-                                            </Grid>
-                                            <Grid Padding="0,18" ColumnSpacing="30">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="165" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="動效速度" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                                <ComboBox x:Name="MotionTempoBox" Grid.Column="1" Width="180" HorizontalAlignment="Left" SelectedIndex="1" Style="{StaticResource CompactComboBoxStyle}" SelectionChanged="SettingsSelectionChanged">
-                                                    <ComboBoxItem Content="快速 · 0.75×" />
-                                                    <ComboBoxItem Content="標準 · 1.00×" />
-                                                    <ComboBoxItem Content="舒緩 · 1.25×" />
-                                                </ComboBox>
-                                            </Grid>
-                                            <Grid Padding="0,18,0,21" ColumnSpacing="30">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="165" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="自訂背景" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" Margin="0,4,0,0" />
-                                                <StackPanel Grid.Column="1" Spacing="9">
+                                                <TextBlock Text="自訂背景" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" CharacterSpacing="100" Foreground="{ThemeResource AppFaintTextBrush}" Margin="0,3,0,0" />
+                                                <Grid Grid.Column="1" ColumnSpacing="14">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="128" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
                                                     <Border
-                                                        Width="144"
-                                                        Height="81"
-                                                        HorizontalAlignment="Left"
+                                                        Width="128"
+                                                        Height="72"
+                                                        VerticalAlignment="Top"
                                                         Background="{ThemeResource AppSurfaceSubtleBrush}"
                                                         BorderBrush="{ThemeResource AppBorderStrongBrush}"
                                                         BorderThickness="1"
                                                         CornerRadius="9">
-                                                        <TextBlock Text="背景圖&#10;未選擇" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource UtilityTextBlockStyle}" FontSize="11.25" />
+                                                        <TextBlock Text="背景圖&#10;未選擇" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource UtilityTextBlockStyle}" FontSize="9.5" Foreground="{ThemeResource AppFaintTextBrush}" />
                                                     </Border>
-                                                    <TextBlock x:Name="BackgroundImagePathText" Style="{StaticResource PageSubtitleTextBlockStyle}" Text="未使用自訂背景。" />
-                                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                                        <Button Content="選擇圖片" Click="ChooseBackgroundImageClicked" />
-                                                        <Button Content="清除背景" Click="ClearBackgroundImageClicked" />
+                                                    <StackPanel Grid.Column="1" Spacing="11">
+                                                        <TextBlock x:Name="BackgroundImagePathText" Style="{StaticResource PageSubtitleTextBlockStyle}" FontSize="13" Text="未使用自訂背景。圖片會鋪滿視窗並自動壓暗，以維持文字可讀。" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <Button Content="選擇圖片" Height="32" Padding="14,0" CornerRadius="9" Background="{ThemeResource AppSunkenBrush}" Click="ChooseBackgroundImageClicked" />
+                                                            <Button Content="清除背景" Height="32" Padding="14,0" CornerRadius="9" Background="Transparent" Foreground="{ThemeResource AppMutedTextBrush}" Click="ClearBackgroundImageClicked" />
+                                                        </StackPanel>
                                                     </StackPanel>
-                                                </StackPanel>
+                                                </Grid>
                                             </Grid>
                                         </StackPanel>
                                     </Border>
@@ -917,22 +1121,23 @@
                             <Border
                                 x:Name="SettingsSavePanel"
                                 Grid.Row="2"
-                                Margin="-30,0,-30,-27"
-                                Padding="30,15"
-                                Background="{ThemeResource AppControlBrush}"
+                                Padding="34,14"
+                                Background="{ThemeResource AppSunkenBrush}"
                                 BorderBrush="{ThemeResource AppBorderBrush}"
                                 BorderThickness="0,1,0,0">
-                                <StackPanel Orientation="Horizontal" Spacing="15">
-                                    <Button Content="儲存設定" Style="{StaticResource PrimaryActionButtonStyle}" Click="SaveSettingsClicked" />
+                                <StackPanel Orientation="Horizontal" Spacing="16">
+                                    <Button Content="儲存設定" Height="38" Padding="22,0" Style="{StaticResource PrimaryActionButtonStyle}" Click="SaveSettingsClicked" />
                                     <TextBlock
                                         x:Name="SettingsDirtyText"
                                         VerticalAlignment="Center"
-                                        Style="{StaticResource UtilityTextBlockStyle}"
+                                        FontSize="12.5"
+                                        Foreground="{ThemeResource AppFaintTextBrush}"
                                         Text="所有變更都已儲存。" />
-                                    <TextBlock x:Name="SettingsMessage" VerticalAlignment="Center" Foreground="{ThemeResource AppMutedTextBrush}" TextWrapping="Wrap" />
+                                    <TextBlock x:Name="SettingsMessage" VerticalAlignment="Center" FontSize="12.5" Foreground="{ThemeResource AppMutedTextBrush}" TextWrapping="Wrap" />
                                 </StackPanel>
                             </Border>
                         </Grid>
+
                     </Grid>
                 </Border>
             </Grid>

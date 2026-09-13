@@ -52,8 +52,8 @@ internal sealed class HistoryDayGroup
         return groups;
     }
 
-    private const int MaxIndentSteps = 6;
-    private const double IndentPixels = 6;
+    private const int MaxIndentSteps = 3;
+    private const double IndentPixels = 18;
 }
 
 /// <summary>
