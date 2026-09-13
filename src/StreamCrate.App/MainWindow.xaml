@@ -477,11 +477,6 @@
                                     <ItemsControl
                                         ItemsSource="{Binding Items}"
                                         ItemTemplateSelector="{StaticResource HistoryEntrySelector}">
-                                        <ItemsControl.ItemContainerTransitions>
-                                            <TransitionCollection>
-                                                <EntranceThemeTransition FromHorizontalOffset="44" FromVerticalOffset="0" />
-                                            </TransitionCollection>
-                                        </ItemsControl.ItemContainerTransitions>
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
                                                 <StackPanel Spacing="8" />

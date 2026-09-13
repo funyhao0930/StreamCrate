@@ -4,6 +4,7 @@ using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using StreamCrate.App.Presentation;
 using StreamCrate.Core.Models;
@@ -1018,6 +1019,12 @@ public sealed partial class MainWindow : Window
 
     private async Task AnimateItemContainersAsync(string? tag, int delay)
     {
+        if (tag == "history")
+        {
+            await AnimateHistoryRowsAsync(delay);
+            return;
+        }
+
         var lists = GetAnimatedItemLists(tag);
         if (PageEntranceAnimationScheduler.RequiresLayoutPass(GetItemCount(lists), GetRealizedContainerCount(lists)))
         {
@@ -1035,6 +1042,117 @@ public sealed partial class MainWindow : Window
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Slides the history entries in one at a time from the top down. HistoryList's own items are
+    /// day groups, so animating its containers would move a whole day as one block; the rows live
+    /// in a nested ItemsControl inside each group's template and are reached through the visual
+    /// tree, with the stagger running continuously across day boundaries.
+    /// </summary>
+    private async Task AnimateHistoryRowsAsync(int delay)
+    {
+        if (HistoryRowContainersArePending())
+        {
+            await WaitForNextLayoutAsync();
+        }
+
+        foreach (var group in HistoryList.Items)
+        {
+            if (HistoryList.ContainerFromItem(group) is not DependencyObject groupContainer)
+            {
+                continue;
+            }
+
+            if (groupContainer is UIElement groupElement)
+            {
+                // The group itself only carries the rows; it must not fade as a block.
+                SetImmediatelyVisible(groupElement);
+            }
+
+            var (header, rows) = FindHistoryGroupParts(groupContainer);
+            if (header is not null)
+            {
+                AnimateOpacity(header, delay);
+            }
+
+            if (rows is null)
+            {
+                continue;
+            }
+
+            foreach (var item in rows.Items)
+            {
+                if (rows.ContainerFromItem(item) is UIElement row)
+                {
+                    AnimateSlideFromRight(row, delay, 44, 440);
+                    delay += 55;
+                }
+            }
+        }
+    }
+
+    private bool HistoryRowContainersArePending()
+    {
+        foreach (var group in HistoryList.Items)
+        {
+            if (HistoryList.ContainerFromItem(group) is not DependencyObject groupContainer)
+            {
+                return true;
+            }
+
+            var (_, rows) = FindHistoryGroupParts(groupContainer);
+            if (rows is null || PageEntranceAnimationScheduler.RequiresLayoutPass(rows.Items.Count, RealizedCountOf(rows)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static int RealizedCountOf(ItemsControl list) =>
+        list.Items.Cast<object>().Count(item => list.ContainerFromItem(item) is UIElement);
+
+    /// <summary>
+    /// Pulls the day label row and the entry list out of one rendered day group. The group's
+    /// template root is a StackPanel holding the header grid followed by the entries.
+    /// </summary>
+    private static (UIElement? Header, ItemsControl? Rows) FindHistoryGroupParts(DependencyObject groupContainer)
+    {
+        var rows = FindDescendant<ItemsControl>(groupContainer);
+        if (rows is null)
+        {
+            return (null, null);
+        }
+
+        var header = VisualTreeHelper.GetParent(rows) is StackPanel panel && panel.Children.Count > 0
+            ? panel.Children[0] as UIElement
+            : null;
+
+        return (ReferenceEquals(header, rows) ? null : header, rows);
+    }
+
+    private static T? FindDescendant<T>(DependencyObject root) where T : DependencyObject
+    {
+        var queue = new Queue<DependencyObject>();
+        queue.Enqueue(root);
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+            for (var index = 0; index < VisualTreeHelper.GetChildrenCount(current); index++)
+            {
+                var child = VisualTreeHelper.GetChild(current, index);
+                if (child is T match)
+                {
+                    return match;
+                }
+
+                queue.Enqueue(child);
+            }
+        }
+
+        return null;
     }
 
     private Task WaitForNextLayoutAsync()
@@ -1057,6 +1175,43 @@ public sealed partial class MainWindow : Window
 
     private void SetItemContainersImmediatelyVisible(string? tag)
     {
+        if (tag == "history")
+        {
+            foreach (var group in HistoryList.Items)
+            {
+                if (HistoryList.ContainerFromItem(group) is not DependencyObject groupContainer)
+                {
+                    continue;
+                }
+
+                if (groupContainer is UIElement groupElement)
+                {
+                    SetImmediatelyVisible(groupElement);
+                }
+
+                var (header, rows) = FindHistoryGroupParts(groupContainer);
+                if (header is not null)
+                {
+                    SetImmediatelyVisible(header);
+                }
+
+                if (rows is null)
+                {
+                    continue;
+                }
+
+                foreach (var item in rows.Items)
+                {
+                    if (rows.ContainerFromItem(item) is UIElement row)
+                    {
+                        SetImmediatelyVisible(row);
+                    }
+                }
+            }
+
+            return;
+        }
+
         foreach (var list in GetAnimatedItemLists(tag))
         {
             foreach (var item in list.Items)
