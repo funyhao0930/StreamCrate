@@ -105,8 +105,8 @@ public sealed class PresentationContractTests
     [InlineData(DownloadJobState.Probing, "InProgress")]
     [InlineData(DownloadJobState.Downloading, "InProgress")]
     [InlineData(DownloadJobState.PostProcessing, "InProgress")]
-    [InlineData(DownloadJobState.Cancelled, "InProgress")]
-    [InlineData(DownloadJobState.SkippedExisting, "InProgress")]
+    [InlineData(DownloadJobState.Cancelled, "Failed")]
+    [InlineData(DownloadJobState.SkippedExisting, "Completed")]
     [InlineData(DownloadJobState.Completed, "Completed")]
     [InlineData(DownloadJobState.Failed, "Failed")]
     public void Queue_item_places_each_download_state_in_its_expected_section(DownloadJobState state, string expectedSection)
@@ -116,6 +116,23 @@ public sealed class PresentationContractTests
         var item = CreateQueueItem(job);
 
         Assert.Equal(expectedSection, GetQueueItemProperty<string>(item, "Section"));
+    }
+
+    [Fact]
+    public void Cancelled_queue_item_drops_the_error_box_it_has_no_message_for()
+    {
+        var item = CreateQueueItem(CreateJob(DownloadJobState.Cancelled));
+
+        Assert.Equal(string.Empty, GetQueueItemProperty<string>(item, "ErrorMessage"));
+        Assert.Equal("Collapsed", QueueItemPropertyText(item, "ErrorVisibility"));
+    }
+
+    [Fact]
+    public void Failed_queue_item_keeps_the_error_box_when_it_carries_a_message()
+    {
+        var item = CreateQueueItem(CreateJob(DownloadJobState.Failed, "ERROR: boom"));
+
+        Assert.Equal("Visible", QueueItemPropertyText(item, "ErrorVisibility"));
     }
 
     [Fact]
@@ -263,6 +280,9 @@ public sealed class PresentationContractTests
 
         return job;
     }
+
+    private static string QueueItemPropertyText(object item, string name) =>
+        item.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.Instance)!.GetValue(item)!.ToString()!;
 
     private static object CreateQueueItem(DownloadJob job)
     {

@@ -24,7 +24,9 @@ public sealed class YtDlpCommandFactory
             "--newline",
             "--no-warnings",
             "--progress-template",
-            "download:%(progress._percent_str)s|%(progress._speed_str)s|%(progress._total_bytes_str)s|%(progress._eta_str)s",
+            // "download:" selects the template type and is consumed by yt-dlp; the marker after it
+            // is what reaches stdout and lets the parser pick progress out of the ordinary output.
+            $"download:{YtDlpProgressParser.LinePrefix}%(progress._percent_str)s|%(progress._speed_str)s|%(progress._total_bytes_str)s|%(progress._eta_str)s",
             "--ffmpeg-location",
             ffmpegDirectory,
             "--continue",

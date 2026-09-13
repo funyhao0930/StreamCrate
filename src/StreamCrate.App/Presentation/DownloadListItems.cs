@@ -47,17 +47,20 @@ internal sealed class QueueItem : ObservableObject
     public double ProgressPercent
     {
         get => _progressPercent;
-        private set
-        {
-            if (SetProperty(ref _progressPercent, value))
-            {
-                OnPropertyChanged(nameof(ProgressPercentText));
-            }
-        }
+        private set => SetProperty(ref _progressPercent, value);
     }
 
-    /// <summary>Percent shown beside the bar, matching the design's "24%" readout.</summary>
-    public string ProgressPercentText => $"{Math.Round(_progressPercent):0}%";
+    private string _progressPercentText = string.Empty;
+
+    /// <summary>
+    /// Readout beside the bar: the design's "24%" once yt-dlp reports a percent, and the state
+    /// word ("等待中" / "處理中") before then, the way the mockup's converting card reads "轉檔".
+    /// </summary>
+    public string ProgressPercentText
+    {
+        get => _progressPercentText;
+        private set => SetProperty(ref _progressPercentText, value);
+    }
 
     private string _progressDetails = string.Empty;
     public string ProgressDetails
@@ -87,6 +90,32 @@ internal sealed class QueueItem : ObservableObject
         private set => SetProperty(ref _errorMessage, value);
     }
 
+    private Visibility _errorVisibility;
+
+    /// <summary>
+    /// Hides the error box and the copy action for a stopped job that carries no message, which is
+    /// the case for a user-cancelled download.
+    /// </summary>
+    public Visibility ErrorVisibility
+    {
+        get => _errorVisibility;
+        private set => SetProperty(ref _errorVisibility, value);
+    }
+
+    private Visibility _completedBadgeVisibility;
+    public Visibility CompletedBadgeVisibility
+    {
+        get => _completedBadgeVisibility;
+        private set => SetProperty(ref _completedBadgeVisibility, value);
+    }
+
+    private Visibility _skippedBadgeVisibility;
+    public Visibility SkippedBadgeVisibility
+    {
+        get => _skippedBadgeVisibility;
+        private set => SetProperty(ref _skippedBadgeVisibility, value);
+    }
+
     private Visibility _cancelVisibility;
     public Visibility CancelVisibility
     {
@@ -99,18 +128,31 @@ internal sealed class QueueItem : ObservableObject
         Section = GetSection(job.State);
         State = DownloadStateText.Get(job.State);
         Details = $"{State} · {FormatText(job.Request.Format)} · {QualityText(job.Request.Quality)}";
-        ProgressPercent = job.Progress?.Percent ?? 0;
+        var percent = job.Progress?.Percent;
+        ProgressPercent = percent ?? 0;
+        ProgressPercentText = percent is double value ? $"{Math.Round(value):0}%" : State;
         ProgressDetails = BuildProgressDetails(job.Progress);
-        ProgressVisibility = job.Progress?.Percent is null ? Visibility.Collapsed : Visibility.Visible;
+        // The design keeps a track under every in-progress row, so the card must not lose its bar
+        // in the window between the job starting and yt-dlp emitting its first percent.
+        ProgressVisibility = GetSection(job.State) == "InProgress" ? Visibility.Visible : Visibility.Collapsed;
         ProgressDetailsVisibility = string.IsNullOrWhiteSpace(ProgressDetails) ? Visibility.Collapsed : Visibility.Visible;
         ErrorMessage = job.ErrorMessage is null ? string.Empty : UserFacingErrorMapper.Map(job.ErrorMessage);
+        ErrorVisibility = string.IsNullOrWhiteSpace(ErrorMessage) ? Visibility.Collapsed : Visibility.Visible;
+        var skipped = job.State is DownloadJobState.SkippedExisting;
+        SkippedBadgeVisibility = skipped ? Visibility.Visible : Visibility.Collapsed;
+        CompletedBadgeVisibility = skipped ? Visibility.Collapsed : Visibility.Visible;
         CancelVisibility = job.State is DownloadJobState.Queued or DownloadJobState.Downloading ? Visibility.Visible : Visibility.Collapsed;
     }
 
+    /// <summary>
+    /// Which board column a job belongs to. A job the user cancelled has stopped for good, so it
+    /// files under 下載失敗 next to the retry action rather than lingering in 下載中; a job skipped
+    /// because the file already exists counts as a finished download.
+    /// </summary>
     public static string GetSection(DownloadJobState state) => state switch
     {
-        DownloadJobState.Completed => "Completed",
-        DownloadJobState.Failed => "Failed",
+        DownloadJobState.Completed or DownloadJobState.SkippedExisting => "Completed",
+        DownloadJobState.Failed or DownloadJobState.Cancelled => "Failed",
         _ => "InProgress",
     };
 

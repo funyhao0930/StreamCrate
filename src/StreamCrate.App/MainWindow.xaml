@@ -317,9 +317,14 @@
                                             <ColumnDefinition Width="26" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="26" Height="26" VerticalAlignment="Top" CornerRadius="13" Background="{ThemeResource AppPrimaryBrush}">
-                                            <FontIcon Glyph="&#xE73E;" FontSize="12" FontFamily="{StaticResource AppSymbolFontFamily}" Foreground="{ThemeResource AppOnPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        </Border>
+                                        <Grid VerticalAlignment="Top">
+                                            <Border Width="26" Height="26" CornerRadius="13" Background="{ThemeResource AppPrimaryBrush}" Visibility="{Binding CompletedBadgeVisibility}">
+                                                <FontIcon Glyph="&#xE73E;" FontSize="12" FontFamily="{StaticResource AppSymbolFontFamily}" Foreground="{ThemeResource AppOnPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <Border Width="26" Height="26" CornerRadius="13" BorderBrush="{ThemeResource AppBorderStrongBrush}" BorderThickness="1" Visibility="{Binding SkippedBadgeVisibility}">
+                                                <FontIcon Glyph="&#xE738;" FontSize="12" FontFamily="{StaticResource AppSymbolFontFamily}" Foreground="{ThemeResource AppFaintTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </Grid>
                                         <StackPanel Grid.Column="1">
                                             <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" LineHeight="17" TextTrimming="CharacterEllipsis" />
                                             <TextBlock Text="{Binding Details}" Margin="0,4,0,0" Style="{StaticResource UtilityTextBlockStyle}" FontSize="10.5" TextTrimming="CharacterEllipsis" />
@@ -360,12 +365,12 @@
                                             </StackPanel>
                                             <FontIcon Grid.Column="1" Glyph="&#xE711;" FontSize="15" FontFamily="{StaticResource AppSymbolFontFamily}" Foreground="{ThemeResource AppErrorBrush}" VerticalAlignment="Top" Margin="0,1,0,0" />
                                         </Grid>
-                                        <Border Margin="0,11,0,0" Background="{ThemeResource AppErrorSoftBrush}" BorderBrush="{ThemeResource AppErrorBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="11,10">
+                                        <Border Margin="0,11,0,0" Visibility="{Binding ErrorVisibility}" Background="{ThemeResource AppErrorSoftBrush}" BorderBrush="{ThemeResource AppErrorBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="11,10">
                                             <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" FontSize="11.5" LineHeight="17" Foreground="{ThemeResource AppErrorTextBrush}" />
                                         </Border>
                                         <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,11,0,0">
                                             <Button Content="重試" Tag="{Binding Id}" Height="28" Padding="12,0" CornerRadius="8" FontSize="11.5" FontWeight="SemiBold" Background="{ThemeResource AppBorderBrush}" BorderThickness="0" Click="RetryJobClicked" />
-                                            <Button Content="複製錯誤訊息" Tag="{Binding ErrorMessage}" Height="28" Padding="12,0" CornerRadius="8" FontSize="11.5" Background="Transparent" Foreground="{ThemeResource AppMutedTextBrush}" Click="CopyJobErrorClicked" />
+                                            <Button Content="複製錯誤訊息" Tag="{Binding ErrorMessage}" Visibility="{Binding ErrorVisibility}" Height="28" Padding="12,0" CornerRadius="8" FontSize="11.5" Background="Transparent" Foreground="{ThemeResource AppMutedTextBrush}" Click="CopyJobErrorClicked" />
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
