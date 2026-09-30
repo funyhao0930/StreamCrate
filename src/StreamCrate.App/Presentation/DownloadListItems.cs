@@ -134,9 +134,30 @@ internal sealed class QueueItem : ObservableObject
         private set => SetProperty(ref _cancelVisibility, value);
     }
 
+    private bool _hasPendingCompletionCue;
+
+    /// <summary>
+    /// True once, for a job this session watched move from 下載中 to a real completion, so the
+    /// check mark celebrates that moment and not every later re-render of the finished card.
+    /// </summary>
+    public bool TryConsumeCompletionCue()
+    {
+        var pending = _hasPendingCompletionCue;
+        _hasPendingCompletionCue = false;
+        return pending;
+    }
+
+    public void ClearCompletionCue() => _hasPendingCompletionCue = false;
+
     public void Update(DownloadJob job)
     {
+        var previousSection = Section;
         Section = GetSection(job.State);
+        if (previousSection == "InProgress" && job.State is DownloadJobState.Completed)
+        {
+            _hasPendingCompletionCue = true;
+        }
+
         State = DownloadStateText.Get(job.State);
         Details = $"{State} · {FormatText(job.Request.Format)} · {QualityText(job.Request.Quality)}";
         var percent = job.Progress?.Percent;

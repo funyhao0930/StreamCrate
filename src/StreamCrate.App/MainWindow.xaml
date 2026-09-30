@@ -234,7 +234,7 @@
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <Border Width="44" Height="26" VerticalAlignment="Top" Style="{StaticResource ThumbnailBorderStyle}">
-                                                <Image Source="{Binding Thumbnail}" Visibility="{Binding ThumbnailVisibility}" Stretch="UniformToFill" />
+                                                <Image Source="{Binding Thumbnail}" Visibility="{Binding ThumbnailVisibility}" Stretch="UniformToFill" Loaded="ThumbnailImageLoaded" ImageOpened="ThumbnailImageOpened" />
                                             </Border>
                                             <StackPanel Grid.Column="1">
                                                 <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" LineHeight="17" TextTrimming="CharacterEllipsis" />
@@ -320,7 +320,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid VerticalAlignment="Top">
-                                            <Border Width="26" Height="26" CornerRadius="13" Background="{ThemeResource AppPrimaryBrush}" Visibility="{Binding CompletedBadgeVisibility}">
+                                            <Border Width="26" Height="26" CornerRadius="13" Background="{ThemeResource AppPrimaryBrush}" Visibility="{Binding CompletedBadgeVisibility}" Loaded="CompletedBadgeLoaded">
                                                 <FontIcon Glyph="&#xE73E;" FontSize="12" FontFamily="{StaticResource AppSymbolFontFamily}" Foreground="{ThemeResource AppOnPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                             </Border>
                                             <Border Width="26" Height="26" CornerRadius="13" BorderBrush="{ThemeResource AppBorderStrongBrush}" BorderThickness="1" Visibility="{Binding SkippedBadgeVisibility}">
@@ -392,7 +392,7 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <Border Width="52" Height="30" VerticalAlignment="Center" Style="{StaticResource ThumbnailBorderStyle}">
-                                            <Image Source="{Binding Thumbnail}" Visibility="{Binding ThumbnailVisibility}" Stretch="UniformToFill" />
+                                            <Image Source="{Binding Thumbnail}" Visibility="{Binding ThumbnailVisibility}" Stretch="UniformToFill" Loaded="ThumbnailImageLoaded" ImageOpened="ThumbnailImageOpened" />
                                         </Border>
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
@@ -515,7 +515,7 @@
                                 </Grid>
                             </Border>
 
-                            <InfoBar x:Name="StatusBar" Grid.Row="1" Margin="34,14,34,0" IsOpen="False" IsClosable="True">
+                            <InfoBar x:Name="StatusBar" Grid.Row="1" Margin="34,14,34,0" IsOpen="False" IsClosable="True" Closing="StatusBarClosing">
                                 <InfoBar.ActionButton>
                                     <Button x:Name="RetryToolsButton" Content="重試" Click="RetryToolsClicked" Visibility="Collapsed" />
                                 </InfoBar.ActionButton>
@@ -592,10 +592,13 @@
                                                 <StackPanel>
                                                     <TextBlock Text="格式" Style="{StaticResource MetricCaptionTextBlockStyle}" FontWeight="SemiBold" Margin="0,0,0,9" />
                                                     <Border Style="{StaticResource SegmentedHostBorderStyle}">
-                                                        <StackPanel Orientation="Horizontal" Spacing="3">
-                                                            <Button x:Name="FormatMp4Button" Content="MP4" Style="{StaticResource SegmentButtonStyle}" />
-                                                            <Button x:Name="FormatMp3Button" Content="MP3" Style="{StaticResource SegmentButtonStyle}" />
-                                                        </StackPanel>
+                                                        <Grid>
+                                                            <Border x:Name="FormatSegmentPill" Style="{StaticResource SegmentPillBorderStyle}" Background="{ThemeResource AppPrimaryBrush}" />
+                                                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                                                <Button x:Name="FormatMp4Button" Content="MP4" Style="{StaticResource SegmentButtonStyle}" />
+                                                                <Button x:Name="FormatMp3Button" Content="MP3" Style="{StaticResource SegmentButtonStyle}" />
+                                                            </StackPanel>
+                                                        </Grid>
                                                     </Border>
                                                 </StackPanel>
                                                 <StackPanel>
@@ -652,7 +655,7 @@
                                                             Style="{StaticResource UtilityTextBlockStyle}"
                                                             FontSize="9.5"
                                                             Foreground="{ThemeResource AppFaintTextBrush}" />
-                                                        <Image x:Name="ResultThumbnail" Stretch="UniformToFill" Visibility="Collapsed" />
+                                                        <Image x:Name="ResultThumbnail" Stretch="UniformToFill" Visibility="Collapsed" ImageOpened="ThumbnailImageOpened" />
                                                     </Grid>
                                                 </Border>
                                                 <StackPanel Grid.Column="1">
@@ -1021,10 +1024,13 @@
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Text="預設格式" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" CharacterSpacing="100" Foreground="{ThemeResource AppFaintTextBrush}" VerticalAlignment="Center" />
                                                     <Border Grid.Column="1" Style="{StaticResource SegmentedHostBorderStyle}">
-                                                        <StackPanel Orientation="Horizontal" Spacing="3">
-                                                            <Button x:Name="DefaultFormatMp4Button" Content="MP4" Style="{StaticResource SegmentButtonStyle}" Padding="16,0" />
-                                                            <Button x:Name="DefaultFormatMp3Button" Content="MP3" Style="{StaticResource SegmentButtonStyle}" Padding="16,0" />
-                                                        </StackPanel>
+                                                        <Grid>
+                                                            <Border x:Name="DefaultFormatSegmentPill" Style="{StaticResource SegmentPillBorderStyle}" Background="{ThemeResource AppPrimaryBrush}" />
+                                                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                                                <Button x:Name="DefaultFormatMp4Button" Content="MP4" Style="{StaticResource SegmentButtonStyle}" Padding="16,0" />
+                                                                <Button x:Name="DefaultFormatMp3Button" Content="MP3" Style="{StaticResource SegmentButtonStyle}" Padding="16,0" />
+                                                            </StackPanel>
+                                                        </Grid>
                                                     </Border>
                                                 </Grid>
                                             </Border>
@@ -1057,20 +1063,23 @@
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Text="主題" Style="{StaticResource UtilityTextBlockStyle}" FontWeight="SemiBold" CharacterSpacing="100" Foreground="{ThemeResource AppFaintTextBrush}" VerticalAlignment="Center" />
                                                     <Border Grid.Column="1" Style="{StaticResource SegmentedHostBorderStyle}">
-                                                        <StackPanel Orientation="Horizontal" Spacing="3">
-                                                            <Button x:Name="ThemeDarkButton" Style="{StaticResource SegmentButtonStyle}" Padding="14,0">
-                                                                <StackPanel Orientation="Horizontal" Spacing="7">
-                                                                    <Ellipse Width="10" Height="10" Fill="#0B0F12" Stroke="{ThemeResource AppBorderStrongBrush}" StrokeThickness="1" VerticalAlignment="Center" />
-                                                                    <TextBlock Text="深色" VerticalAlignment="Center" />
-                                                                </StackPanel>
-                                                            </Button>
-                                                            <Button x:Name="ThemeLightButton" Style="{StaticResource SegmentButtonStyle}" Padding="14,0">
-                                                                <StackPanel Orientation="Horizontal" Spacing="7">
-                                                                    <Ellipse Width="10" Height="10" Fill="#E8F0F2" VerticalAlignment="Center" />
-                                                                    <TextBlock Text="淺色" VerticalAlignment="Center" />
-                                                                </StackPanel>
-                                                            </Button>
-                                                        </StackPanel>
+                                                        <Grid>
+                                                            <Border x:Name="ThemeSegmentPill" Style="{StaticResource SegmentPillBorderStyle}" Background="{ThemeResource AppSegmentSelectedBrush}" />
+                                                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                                                <Button x:Name="ThemeDarkButton" Style="{StaticResource SegmentButtonStyle}" Padding="14,0">
+                                                                    <StackPanel Orientation="Horizontal" Spacing="7">
+                                                                        <Ellipse Width="10" Height="10" Fill="#0B0F12" Stroke="{ThemeResource AppBorderStrongBrush}" StrokeThickness="1" VerticalAlignment="Center" />
+                                                                        <TextBlock Text="深色" VerticalAlignment="Center" />
+                                                                    </StackPanel>
+                                                                </Button>
+                                                                <Button x:Name="ThemeLightButton" Style="{StaticResource SegmentButtonStyle}" Padding="14,0">
+                                                                    <StackPanel Orientation="Horizontal" Spacing="7">
+                                                                        <Ellipse Width="10" Height="10" Fill="#E8F0F2" VerticalAlignment="Center" />
+                                                                        <TextBlock Text="淺色" VerticalAlignment="Center" />
+                                                                    </StackPanel>
+                                                                </Button>
+                                                            </StackPanel>
+                                                        </Grid>
                                                     </Border>
                                                 </Grid>
                                             </Border>
@@ -1131,7 +1140,7 @@
                                 BorderBrush="{ThemeResource AppBorderBrush}"
                                 BorderThickness="0,1,0,0">
                                 <StackPanel Orientation="Horizontal" Spacing="16">
-                                    <Button Content="儲存設定" Height="38" Padding="22,0" Style="{StaticResource PrimaryActionButtonStyle}" Click="SaveSettingsClicked" />
+                                    <Button x:Name="SaveSettingsButton" Content="儲存設定" Height="38" Padding="22,0" Style="{StaticResource PrimaryActionButtonStyle}" Click="SaveSettingsClicked" />
                                     <TextBlock
                                         x:Name="SettingsDirtyText"
                                         VerticalAlignment="Center"

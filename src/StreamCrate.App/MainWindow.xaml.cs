@@ -71,6 +71,7 @@ public sealed partial class MainWindow : Window
         _queue.JobChanged += QueueJobChanged;
         _throughputTimer.Tick += ThroughputTimerTick;
         BuildSegmentedSelectors();
+        AttachMotionFeedback();
         InProgressQueueList.ItemsSource = _inProgressQueueItems;
         CompletedQueueList.ItemsSource = _completedQueueItems;
         FailedQueueList.ItemsSource = _failedQueueItems;
@@ -278,7 +279,7 @@ public sealed partial class MainWindow : Window
 
         _isProbing = true;
         ProbeButton.IsEnabled = false;
-        ProbeBusyPanel.Visibility = Visibility.Visible;
+        RevealProbeBusyPanelAfterDelay();
         ClearResolvedResult();
         try
         {
@@ -303,7 +304,7 @@ public sealed partial class MainWindow : Window
         finally
         {
             _isProbing = false;
-            ProbeBusyPanel.Visibility = Visibility.Collapsed;
+            HideProbeBusyPanel();
             ProbeButton.IsEnabled = _toolsReady;
         }
     }
@@ -342,6 +343,7 @@ public sealed partial class MainWindow : Window
     {
         var source = Thumbnails.Load(thumbnailUrl, ResultThumbnailWidth);
         ResultThumbnail.Source = source;
+        PrepareThumbnailFade(ResultThumbnail);
         ResultThumbnail.Visibility = source is null ? Visibility.Collapsed : Visibility.Visible;
     }
 
@@ -620,6 +622,14 @@ public sealed partial class MainWindow : Window
         QueueSectionSynchronizer.Synchronize(_inProgressQueueItems, jobs.Where(job => QueueItem.GetSection(job.State) == "InProgress").Select(job => _queueItemsById[job.Id]));
         QueueSectionSynchronizer.Synchronize(_completedQueueItems, jobs.Where(job => QueueItem.GetSection(job.State) == "Completed").Select(job => _queueItemsById[job.Id]));
         QueueSectionSynchronizer.Synchronize(_failedQueueItems, jobs.Where(job => QueueItem.GetSection(job.State) == "Failed").Select(job => _queueItemsById[job.Id]));
+        if (QueuePanel.Visibility != Visibility.Visible)
+        {
+            // Completions nobody saw happen are not replayed when the queue is opened later.
+            foreach (var item in _queueItemsById.Values)
+            {
+                item.ClearCompletionCue();
+            }
+        }
 
         var activeCount = jobs.Count(job => job.State is DownloadJobState.Queued or DownloadJobState.Probing or DownloadJobState.Downloading or DownloadJobState.PostProcessing);
         QueueSummaryText.Text = $"QUEUE · {activeCount} ACTIVE";
@@ -627,8 +637,7 @@ public sealed partial class MainWindow : Window
         InProgressCountText.Text = _inProgressQueueItems.Count.ToString();
         CompletedCountText.Text = _completedQueueItems.Count.ToString();
         FailedCountText.Text = _failedQueueItems.Count.ToString();
-        QueueCountBadgeText.Text = activeCount.ToString();
-        QueueCountBadge.Visibility = activeCount == 0 ? Visibility.Collapsed : Visibility.Visible;
+        UpdateQueueBadge(activeCount, animate: true);
         // The design keeps the board as three standing columns; only a completely empty queue
         // swaps in the placeholder, so a single job no longer collapses the layout to one column.
         var hasJobs = jobs.Count > 0;
@@ -1447,9 +1456,8 @@ public sealed partial class MainWindow : Window
         NavQueueLabel.Visibility = compactSidebar ? Visibility.Collapsed : Visibility.Visible;
         NavHistoryLabel.Visibility = compactSidebar ? Visibility.Collapsed : Visibility.Visible;
         NavSettingsLabel.Visibility = compactSidebar ? Visibility.Collapsed : Visibility.Visible;
-        QueueCountBadge.Visibility = compactSidebar || QueueCountBadgeText.Text == "0"
-            ? Visibility.Collapsed
-            : Visibility.Visible;
+        _compactSidebar = compactSidebar;
+        UpdateQueueBadge(_queueBadgeCount, animate: false);
 
         var narrow = args.NewSize.Width < 780;
         OptionsPanel.Orientation = narrow ? Orientation.Vertical : Orientation.Horizontal;
@@ -1480,7 +1488,7 @@ public sealed partial class MainWindow : Window
         StatusBar.Title = title;
         StatusBar.Message = message;
         StatusBar.Severity = severity;
-        StatusBar.IsOpen = true;
+        OpenStatusBar();
         RetryToolsButton.Visibility = showRetry ? Visibility.Visible : Visibility.Collapsed;
     }
 
