@@ -1,6 +1,6 @@
 #define MyAppName "StreamCrate"
 #ifndef MyAppVersion
-  #define MyAppVersion "1.0.3"
+  #define MyAppVersion "1.0.4"
 #endif
 #define MyAppPublisher "StreamCrate contributors"
 #define MyAppURL "https://github.com/funyhao0930/StreamCrate"

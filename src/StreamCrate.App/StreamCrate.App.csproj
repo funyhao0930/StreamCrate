@@ -12,7 +12,7 @@
     <AssemblyName>StreamCrate.App</AssemblyName>
     <ApplicationIcon>Assets\StreamCrate.ico</ApplicationIcon>
     <!-- Compared against the GitHub Release tag by the in-app updater; CI overrides it from the tag. -->
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
