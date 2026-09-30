@@ -1,5 +1,7 @@
 #define MyAppName "StreamCrate"
-#define MyAppVersion "1.0.3"
+#ifndef MyAppVersion
+  #define MyAppVersion "1.0.3"
+#endif
 #define MyAppPublisher "StreamCrate contributors"
 #define MyAppURL "https://github.com/funyhao0930/StreamCrate"
 #define MyAppExeName "StreamCrate.App.exe"
@@ -28,6 +30,8 @@ PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 UninstallDisplayName={#MyAppName}
 SetupIconFile={#MyAppIconFile}
+CloseApplications=yes
+RestartApplications=no
 
 [Languages]
 Name: "zhTW"; MessagesFile: "Languages\ChineseTraditional.isl"
@@ -45,8 +49,15 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilen
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
+; The in-app updater runs this installer with /SILENT /RELAUNCH=1, so reopen the app afterwards.
+Filename: "{app}\{#MyAppExeName}"; Flags: nowait runasoriginaluser; Check: ShouldRelaunch
 
 [Code]
+function ShouldRelaunch: Boolean;
+begin
+  Result := WizardSilent and (ExpandConstant('{param:RELAUNCH|0}') = '1');
+end;
+
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   { User data lives in %LocalAppData% and is deliberately not removed. }

@@ -99,6 +99,7 @@ public sealed partial class MainWindow : Window
             ShowError("無法載入設定", exception.Message);
         }
 
+        _ = CheckForUpdatesAsync(userInitiated: false);
         await EnsureToolsAsync();
     }
 
@@ -1022,7 +1023,7 @@ public sealed partial class MainWindow : Window
     {
         "queue" => (QueuePageTitle, QueuePageSubtitle, [QueueBoard]),
         "history" => (HistoryPageTitle, HistoryPageSubtitle, [HistoryControls, HistoryStatsPanel, HistoryEmptyState]),
-        "settings" => (SettingsPageTitle, SettingsPageSubtitle, [DownloadDefaultsCard, AppearanceCard, SettingsSavePanel]),
+        "settings" => (SettingsPageTitle, SettingsPageSubtitle, [DownloadDefaultsCard, AppearanceCard, UpdateCard, SettingsSavePanel]),
         _ => (DownloadPageTitle, DownloadPageSubtitle, [DownloadPrimaryCard, ResolvedResultPanel]),
     };
 

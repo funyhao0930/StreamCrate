@@ -50,12 +50,21 @@ jobs:
           dotnet-version: 10.0.x
       - name: Restore locked dependencies
         run: dotnet restore $env:SOLUTION --locked-mode
+      # The in-app updater compares the installed assembly version with the release tag,
+      # so both the app and the installer take their version from the tag (v1.2.3 / V1.2.3).
+      - name: Resolve version from tag
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v', 'V')
+          if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "Tag must look like v1.2.3, got ${{ github.ref_name }}" }
+          "APP_VERSION=$version" >> $env:GITHUB_ENV
       - name: Publish self-contained x64 app
-        run: dotnet publish $env:APP_PROJECT -c Release -r win-x64 --self-contained true -p:Platform=x64 --no-restore -o $env:PUBLISH_DIR
+        run: dotnet publish $env:APP_PROJECT -c Release -r win-x64 --self-contained true -p:Platform=x64 -p:Version=$env:APP_VERSION --no-restore -o $env:PUBLISH_DIR
       - name: Build Inno Setup installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
         with:
           path: installer/StreamCrate.iss
+          options: /DMyAppVersion=${{ env.APP_VERSION }}
       - name: Generate installer checksum
         shell: pwsh
         run: Get-FileHash artifacts/installer/StreamCrate-Setup-x64.exe -Algorithm SHA256 | ForEach-Object { "$($_.Hash) *$($_.Path | Split-Path -Leaf)" } | Set-Content artifacts/installer/StreamCrate-Setup-x64.exe.sha256 -NoNewline
