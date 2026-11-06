@@ -74,12 +74,13 @@ public sealed class YtDlpCommandFactory
             return "%(title)s [%(id)s].%(ext)s";
         }
 
-        var playlistTitle = SanitizeFolderName(request.PlaylistTitle);
+        var playlistTitle = GetPlaylistFolderName(request.PlaylistTitle);
         var playlistIndex = request.PlaylistIndex.GetValueOrDefault();
         return $"{playlistTitle}/{playlistIndex:D2} - %(title)s [%(id)s].%(ext)s";
     }
 
-    private static string SanitizeFolderName(string value)
+    /// <summary>The folder a playlist's items are saved into, as the output template names it.</summary>
+    public static string GetPlaylistFolderName(string value)
     {
         const string invalidCharacters = "<>:\"/\\|?*";
         var sanitized = new string(value

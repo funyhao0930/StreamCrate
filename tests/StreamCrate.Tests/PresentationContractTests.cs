@@ -173,6 +173,8 @@ public sealed class PresentationContractTests
         Assert.Contains("開啟檔案位置", xaml, StringComparison.Ordinal);
         Assert.Contains("Tag=\"{Binding OutputPath}\"", xaml, StringComparison.Ordinal);
         Assert.Contains("Click=\"OpenQueueFolderClicked\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("刪除檔案", xaml, StringComparison.Ordinal);
+        Assert.Contains("Click=\"DeleteQueueFileClicked\"", xaml, StringComparison.Ordinal);
         Assert.Contains("AppErrorBrush", xaml, StringComparison.Ordinal);
         Assert.Contains("Color=\"#F27A7E\"", theme, StringComparison.Ordinal);
     }

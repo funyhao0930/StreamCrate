@@ -330,13 +330,21 @@
                                         <StackPanel Grid.Column="1">
                                             <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" LineHeight="17" TextTrimming="CharacterEllipsis" />
                                             <TextBlock Text="{Binding Details}" Margin="0,4,0,0" Style="{StaticResource UtilityTextBlockStyle}" FontSize="10.5" TextTrimming="CharacterEllipsis" />
-                                            <Button
-                                                Content="開啟檔案位置"
-                                                Margin="0,9,0,0"
-                                                Tag="{Binding OutputPath}"
-                                                Style="{StaticResource LinkActionButtonStyle}"
-                                                Foreground="{ThemeResource AppSelectedTextBrush}"
-                                                Click="OpenQueueFolderClicked" />
+                                            <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,9,0,0">
+                                                <Button
+                                                    Content="開啟檔案位置"
+                                                    Tag="{Binding OutputPath}"
+                                                    Style="{StaticResource LinkActionButtonStyle}"
+                                                    Foreground="{ThemeResource AppSelectedTextBrush}"
+                                                    Click="OpenQueueFolderClicked" />
+                                                <Button
+                                                    Content="刪除檔案"
+                                                    Tag="{Binding Id}"
+                                                    Style="{StaticResource LinkActionButtonStyle}"
+                                                    Foreground="{ThemeResource AppErrorTextBrush}"
+                                                    AutomationProperties.Name="刪除這個下載的檔案"
+                                                    Click="DeleteQueueFileClicked" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </Grid>
                                 </Border>

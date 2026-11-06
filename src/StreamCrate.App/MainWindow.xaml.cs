@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using StreamCrate.App.Presentation;
 using StreamCrate.Core.Models;
 using StreamCrate.Infrastructure.Diagnostics;
+using StreamCrate.Infrastructure.Files;
 using StreamCrate.Infrastructure.Processes;
 using StreamCrate.Infrastructure.Queue;
 using StreamCrate.Infrastructure.Storage;
@@ -808,6 +809,73 @@ public sealed partial class MainWindow : Window
         {
             await OpenFolderAsync(outputPath);
         }
+    }
+
+    /// <summary>
+    /// Removes a finished download the user did not want: confirms first, sends the file to the
+    /// Recycle Bin so a slip can still be undone, then drops the card from 下載完成.
+    /// </summary>
+    private async void DeleteQueueFileClicked(object sender, RoutedEventArgs args)
+    {
+        if ((sender as FrameworkElement)?.Tag is not Guid jobId
+            || !_queueItemsById.TryGetValue(jobId, out var item))
+        {
+            return;
+        }
+
+        var filePath = await Task.Run(() => DownloadedFileLocator.Find(item.Request));
+        if (filePath is null)
+        {
+            var missingDialog = new ContentDialog
+            {
+                XamlRoot = RootGrid.XamlRoot,
+                Title = "找不到這個檔案",
+                Content = "檔案可能已被移動、改名或刪除。要把這筆從「下載完成」移除嗎？",
+                PrimaryButtonText = "從列表移除",
+                CloseButtonText = "取消",
+                DefaultButton = ContentDialogButton.Close,
+            };
+            if (await missingDialog.ShowAsync() == ContentDialogResult.Primary && _queue.Remove(jobId))
+            {
+                RenderQueue();
+            }
+
+            return;
+        }
+
+        var fileName = Path.GetFileName(filePath);
+        var dialog = new ContentDialog
+        {
+            XamlRoot = RootGrid.XamlRoot,
+            Title = "刪除這個檔案？",
+            Content = new TextBlock
+            {
+                Text = $"{fileName}\n\n檔案會移到資源回收筒，需要時可以從那裡還原。",
+                TextWrapping = TextWrapping.Wrap,
+            },
+            PrimaryButtonText = "刪除",
+            CloseButtonText = "取消",
+            DefaultButton = ContentDialogButton.Close,
+        };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+        {
+            return;
+        }
+
+        try
+        {
+            var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(filePath);
+            await file.DeleteAsync(Windows.Storage.StorageDeleteOption.Default);
+        }
+        catch (Exception exception)
+        {
+            ShowError("無法刪除檔案", exception.Message);
+            return;
+        }
+
+        _queue.Remove(jobId);
+        RenderQueue();
+        ShowStatus("已刪除檔案", $"「{fileName}」已移到資源回收筒。", InfoBarSeverity.Success, false);
     }
 
     private async Task OpenFolderAsync(string outputPath)

@@ -73,6 +73,28 @@ public sealed class DownloadQueueService : IAsyncDisposable
         return true;
     }
 
+    /// <summary>
+    /// Drops a job that has stopped for good from the board. Waiting or running jobs stay; they
+    /// have to be cancelled first so the worker never loses track of one it is about to run.
+    /// </summary>
+    public bool Remove(Guid jobId)
+    {
+        lock (_gate)
+        {
+            var job = _jobs.FirstOrDefault(candidate => candidate.Id == jobId);
+            if (job is null
+                || _pending.Contains(job)
+                || ReferenceEquals(job, _active)
+                || job.State is not (DownloadJobState.Completed or DownloadJobState.SkippedExisting or DownloadJobState.Failed or DownloadJobState.Cancelled))
+            {
+                return false;
+            }
+
+            _jobs.Remove(job);
+            return true;
+        }
+    }
+
     public IReadOnlyList<DownloadJob> GetSnapshot()
     {
         lock (_gate)
