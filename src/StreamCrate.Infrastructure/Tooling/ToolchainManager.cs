@@ -11,6 +11,7 @@ public sealed class ToolchainManager
     private const string FfmpegReleasesApi = "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest";
     private const string DenoReleasesApi = "https://api.github.com/repos/denoland/deno/releases/latest";
     private const string DenoArchiveName = "deno-x86_64-pc-windows-msvc.zip";
+    private static readonly TimeSpan YtDlpUpdateInterval = TimeSpan.FromHours(24);
     private readonly HttpClient _httpClient;
     private readonly object _ensureLock = new();
     private readonly string _toolDirectory;
@@ -25,7 +26,10 @@ public sealed class ToolchainManager
 
     public string YtDlpPath => Path.Combine(_toolDirectory, "yt-dlp-nightly.exe");
 
-    public string FfmpegPath => Path.Combine(_toolDirectory, "ffmpeg.exe");
+    /// <summary>Holds the release tag of the installed yt-dlp; its write time is the last update check.</summary>
+    private string YtDlpVersionPath => YtDlpPath + ".version";
+
+    public string FfmpegPath =>Path.Combine(_toolDirectory, "ffmpeg.exe");
 
     private string DenoPath => Path.Combine(_toolDirectory, "deno.exe");
 
@@ -63,6 +67,10 @@ public sealed class ToolchainManager
         {
             await DownloadYtDlpAsync(CancellationToken.None);
         }
+        else
+        {
+            await TryUpdateYtDlpAsync(CancellationToken.None);
+        }
 
         if (!File.Exists(FfmpegPath))
         {
@@ -85,12 +93,59 @@ public sealed class ToolchainManager
     private async Task DownloadYtDlpAsync(CancellationToken cancellationToken)
     {
         using var release = await GetReleaseAsync(YtDlpReleasesApi, cancellationToken);
-        var executableUrl = FindAssetUrl(release.RootElement, "yt-dlp.exe");
-        var sumsUrl = FindAssetUrl(release.RootElement, "SHA2-256SUMS");
+        await InstallYtDlpAsync(release.RootElement, cancellationToken);
+    }
+
+    /// <summary>
+    /// Sites change often and an old yt-dlp stops working on them, so the installed copy is
+    /// replaced when a newer nightly exists. Checked at most once per <see cref="YtDlpUpdateInterval"/>;
+    /// any failure keeps the installed copy and the check runs again on the next launch.
+    /// </summary>
+    private async Task TryUpdateYtDlpAsync(CancellationToken cancellationToken)
+    {
+        var versionFile = new FileInfo(YtDlpVersionPath);
+        if (versionFile.Exists && DateTime.UtcNow - versionFile.LastWriteTimeUtc < YtDlpUpdateInterval)
+        {
+            return;
+        }
+
+        try
+        {
+            using var release = await GetReleaseAsync(YtDlpReleasesApi, cancellationToken);
+            var latestTag = GetReleaseTag(release.RootElement);
+            var installedTag = versionFile.Exists
+                ? (await File.ReadAllTextAsync(versionFile.FullName, cancellationToken)).Trim()
+                : null;
+
+            if (latestTag is not null && latestTag == installedTag)
+            {
+                File.SetLastWriteTimeUtc(versionFile.FullName, DateTime.UtcNow);
+                return;
+            }
+
+            await InstallYtDlpAsync(release.RootElement, cancellationToken);
+        }
+        catch (Exception exception) when (exception is HttpRequestException or IOException or InvalidDataException
+            or JsonException or UnauthorizedAccessException or KeyNotFoundException or TaskCanceledException)
+        {
+            // Offline, rate-limited or the executable is in use: keep the installed yt-dlp.
+        }
+    }
+
+    private async Task InstallYtDlpAsync(JsonElement release, CancellationToken cancellationToken)
+    {
+        var executableUrl = FindAssetUrl(release, "yt-dlp.exe");
+        var sumsUrl = FindAssetUrl(release, "SHA2-256SUMS");
         var sums = await _httpClient.GetStringAsync(sumsUrl, cancellationToken);
         var expectedHash = FindChecksum(sums, "yt-dlp.exe");
         await DownloadVerifiedFileAsync(executableUrl, expectedHash, YtDlpPath, cancellationToken);
+        await File.WriteAllTextAsync(YtDlpVersionPath, GetReleaseTag(release) ?? string.Empty, cancellationToken);
     }
+
+    private static string? GetReleaseTag(JsonElement release) =>
+        release.TryGetProperty("tag_name", out var tag) && tag.ValueKind == JsonValueKind.String
+            ? tag.GetString()
+            : null;
 
     private async Task DownloadFfmpegAsync(CancellationToken cancellationToken)
     {

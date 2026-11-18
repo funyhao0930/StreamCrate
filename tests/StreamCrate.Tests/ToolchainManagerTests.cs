@@ -52,8 +52,87 @@ public sealed class ToolchainManagerTests
         Assert.Equal("deno test binary", await File.ReadAllTextAsync(Path.Combine(toolDirectory, "deno.exe")));
     }
 
+    [Fact]
+    public async Task EnsureAvailableAsync_InstalledYtDlpWithoutVersion_IsReplacedByLatest()
+    {
+        var toolDirectory = CreateInstalledToolDirectory("old yt-dlp");
+        var handler = new CoordinatedToolDownloadHandler();
+        handler.ReleaseDownload();
+        using var client = new HttpClient(handler);
+        var manager = new ToolchainManager(client, toolDirectory);
+
+        await manager.EnsureAvailableAsync();
+
+        Assert.Equal(1, handler.YtDlpDownloadCount);
+        Assert.Equal("yt-dlp nightly test binary", await File.ReadAllTextAsync(manager.YtDlpPath));
+        Assert.Equal(CoordinatedToolDownloadHandler.Tag, await File.ReadAllTextAsync(manager.YtDlpPath + ".version"));
+    }
+
+    [Fact]
+    public async Task EnsureAvailableAsync_RecentlyChecked_DoesNotContactGitHub()
+    {
+        var toolDirectory = CreateInstalledToolDirectory("current yt-dlp");
+        await File.WriteAllTextAsync(Path.Combine(toolDirectory, "yt-dlp-nightly.exe.version"), "old-tag");
+        var handler = new CoordinatedToolDownloadHandler();
+        using var client = new HttpClient(handler);
+        var manager = new ToolchainManager(client, toolDirectory);
+
+        await manager.EnsureAvailableAsync();
+
+        Assert.Equal(0, handler.RequestCount);
+        Assert.Equal("current yt-dlp", await File.ReadAllTextAsync(manager.YtDlpPath));
+    }
+
+    [Fact]
+    public async Task EnsureAvailableAsync_StaleCheckWithSameTag_KeepsInstalledCopy()
+    {
+        var toolDirectory = CreateInstalledToolDirectory("current yt-dlp");
+        var versionPath = Path.Combine(toolDirectory, "yt-dlp-nightly.exe.version");
+        await File.WriteAllTextAsync(versionPath, CoordinatedToolDownloadHandler.Tag);
+        File.SetLastWriteTimeUtc(versionPath, DateTime.UtcNow.AddDays(-2));
+        var handler = new CoordinatedToolDownloadHandler();
+        using var client = new HttpClient(handler);
+        var manager = new ToolchainManager(client, toolDirectory);
+
+        await manager.EnsureAvailableAsync();
+
+        Assert.Equal(0, handler.YtDlpDownloadCount);
+        Assert.Equal("current yt-dlp", await File.ReadAllTextAsync(manager.YtDlpPath));
+        Assert.True(DateTime.UtcNow - File.GetLastWriteTimeUtc(versionPath) < TimeSpan.FromMinutes(1));
+    }
+
+    [Fact]
+    public async Task EnsureAvailableAsync_UpdateCheckFails_KeepsInstalledCopy()
+    {
+        var toolDirectory = CreateInstalledToolDirectory("current yt-dlp");
+        var handler = new CoordinatedToolDownloadHandler { FailYtDlpRelease = true };
+        using var client = new HttpClient(handler);
+        var manager = new ToolchainManager(client, toolDirectory);
+
+        await manager.EnsureAvailableAsync();
+
+        Assert.Equal("current yt-dlp", await File.ReadAllTextAsync(manager.YtDlpPath));
+    }
+
+    private static string CreateInstalledToolDirectory(string ytDlpContent)
+    {
+        var toolDirectory = Path.Combine(Path.GetTempPath(), $"streamcrate-tests-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(toolDirectory);
+        File.WriteAllText(Path.Combine(toolDirectory, "yt-dlp-nightly.exe"), ytDlpContent);
+        File.WriteAllBytes(Path.Combine(toolDirectory, "ffmpeg.exe"), [0]);
+        File.WriteAllBytes(Path.Combine(toolDirectory, "deno.exe"), [0]);
+        return toolDirectory;
+    }
+
     private sealed class CoordinatedToolDownloadHandler : HttpMessageHandler
     {
+        public const string Tag = "2026.11.17.123456";
+        private int _requestCount;
+
+        public bool FailYtDlpRelease { get; init; }
+
+        public int RequestCount => _requestCount;
+
         private const string DownloadUrl = "https://example.test/yt-dlp.exe";
         private const string DenoDownloadUrl = "https://example.test/deno-x86_64-pc-windows-msvc.zip";
         private static readonly byte[] Executable = Encoding.UTF8.GetBytes("yt-dlp nightly test binary");
@@ -74,11 +153,17 @@ public sealed class ToolchainManagerTests
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            Interlocked.Increment(ref _requestCount);
             var url = request.RequestUri!.ToString();
             if (url == "https://api.github.com/repos/yt-dlp/yt-dlp-nightly-builds/releases/latest")
             {
-                return Json("""
-                    {"assets":[
+                if (FailYtDlpRelease)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.Forbidden);
+                }
+
+                return Json($$"""
+                    {"tag_name":"{{Tag}}","assets":[
                       {"name":"yt-dlp.exe","browser_download_url":"https://example.test/yt-dlp.exe"},
                       {"name":"SHA2-256SUMS","browser_download_url":"https://example.test/SHA2-256SUMS"}
                     ]}
