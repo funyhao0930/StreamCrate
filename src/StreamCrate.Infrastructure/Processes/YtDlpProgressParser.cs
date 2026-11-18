@@ -31,14 +31,33 @@ public static class YtDlpProgressParser
 
         var percentText = parts[0].Trim().TrimEnd('%');
         double? percent = double.TryParse(percentText, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ? value : null;
-        return new DownloadProgress(percent, Known(parts[1]), Known(parts[2]), ParseEta(parts[3]), DownloadJobState.Downloading);
+        return new DownloadProgress(percent, Known(parts[1]), FormatTotal(parts[2]), ParseEta(parts[3]), DownloadJobState.Downloading);
+    }
+
+    /// <summary>The total arrives as a raw byte count; older templates sent yt-dlp's own text.</summary>
+    private static string FormatTotal(string part)
+    {
+        if (!double.TryParse(part.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var bytes) || bytes <= 0)
+        {
+            return Known(part);
+        }
+
+        string[] units = ["B", "KiB", "MiB", "GiB", "TiB"];
+        var unit = 0;
+        while (bytes >= 1024 && unit < units.Length - 1)
+        {
+            bytes /= 1024;
+            unit++;
+        }
+
+        return string.Create(CultureInfo.InvariantCulture, $"{bytes:0.00}{units[unit]}");
     }
 
     /// <summary>yt-dlp writes "Unknown"/"NA" into its *_str fields before it has a figure.</summary>
     private static string Known(string part)
     {
         var text = part.Trim();
-        return text.Length == 0 || text.Contains("Unknown", StringComparison.OrdinalIgnoreCase) || text == "NA"
+        return text.Length == 0 || text.Contains("Unknown", StringComparison.OrdinalIgnoreCase) || text is "NA" or "N/A"
             ? string.Empty
             : text;
     }

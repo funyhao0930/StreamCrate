@@ -7,6 +7,9 @@ public sealed record ProcessSpecification(
     IReadOnlyList<string> Arguments,
     IReadOnlyList<string> RedactedDisplayArguments);
 
+/// <summary>A prepared info JSON that yt-dlp downloads from instead of the page URL.</summary>
+public sealed record AcceleratedSource(string InfoJsonPath, string FormatIds);
+
 public sealed class YtDlpCommandFactory
 {
     public ProcessSpecification CreateProbe(Uri sourceUrl, CookieSelection cookies)
@@ -17,7 +20,19 @@ public sealed class YtDlpCommandFactory
         return new ProcessSpecification("yt-dlp.exe", arguments, Redact(arguments, cookies));
     }
 
-    public ProcessSpecification CreateDownload(DownloadRequest request, string ffmpegDirectory)
+    /// <summary>Resolves the exact streams a download would fetch, as one JSON object on stdout.</summary>
+    public ProcessSpecification CreateSelectedFormatsProbe(DownloadRequest request)
+    {
+        var arguments = new List<string>
+        {
+            "--dump-json", "--no-warnings", "--no-playlist", "--format", BuildVideoFormat(request.Quality),
+        };
+        AddCookies(arguments, request.Cookies);
+        arguments.Add(request.Media.SourceUrl.AbsoluteUri);
+        return new ProcessSpecification("yt-dlp.exe", arguments, Redact(arguments, request.Cookies));
+    }
+
+    public ProcessSpecification CreateDownload(DownloadRequest request, string ffmpegDirectory, AcceleratedSource? accelerated = null)
     {
         var arguments = new List<string>
         {
@@ -26,7 +41,9 @@ public sealed class YtDlpCommandFactory
             "--progress-template",
             // "download:" selects the template type and is consumed by yt-dlp; the marker after it
             // is what reaches stdout and lets the parser pick progress out of the ordinary output.
-            $"download:{YtDlpProgressParser.LinePrefix}%(progress._percent_str)s|%(progress._speed_str)s|%(progress._total_bytes_str)s|%(progress._eta_str)s",
+            // The total is a raw byte count: fragmented downloads have no total_bytes, but the
+            // accelerated Bilibili path sets the exact filesize on the format.
+            $"download:{YtDlpProgressParser.LinePrefix}%(progress._percent_str)s|%(progress._speed_str)s|%(progress.total_bytes,info.filesize,progress.total_bytes_estimate)s|%(progress._eta_str)s",
             "--ffmpeg-location",
             ffmpegDirectory,
             "--continue",
@@ -40,6 +57,13 @@ public sealed class YtDlpCommandFactory
         if (request.Format == DownloadFormat.Mp3)
         {
             arguments.AddRange(["--extract-audio", "--audio-format", "mp3", "--audio-quality", "0"]);
+        }
+        else if (accelerated is not null)
+        {
+            arguments.AddRange(["--format", accelerated.FormatIds, "--merge-output-format", "mp4"]);
+            arguments.AddRange(["--concurrent-fragments", "8", "--socket-timeout", "15"]);
+            arguments.AddRange(["--load-info-json", accelerated.InfoJsonPath]);
+            return new ProcessSpecification("yt-dlp.exe", arguments, Redact(arguments, request.Cookies));
         }
         else
         {
@@ -58,7 +82,7 @@ public sealed class YtDlpCommandFactory
         return new ProcessSpecification("yt-dlp.exe", arguments, Redact(arguments, request.Cookies));
     }
 
-    private static bool IsBilibili(Uri url)
+    public static bool IsBilibili(Uri url)
     {
         var host = url.Host;
         return host.Equals("bilibili.com", StringComparison.OrdinalIgnoreCase)

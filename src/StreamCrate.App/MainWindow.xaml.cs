@@ -523,6 +523,33 @@ public sealed partial class MainWindow : Window
 
     private async Task ExecuteDownloadAsync(DownloadJob job, IProgress<DownloadProgress> progress, CancellationToken cancellationToken)
     {
+        if (BilibiliDownloadAccelerator.Applies(job.Request)
+            && await new BilibiliDownloadAccelerator(_toolchain.YtDlpPath).TryPrepareAsync(job.Request, cancellationToken) is { } accelerated)
+        {
+            try
+            {
+                var acceleratedSpecification = new YtDlpCommandFactory()
+                    .CreateDownload(job.Request, Path.GetDirectoryName(_toolchain.FfmpegPath)!, accelerated)
+                    with { ExecutablePath = _toolchain.YtDlpPath };
+                await new YtDlpProcessRunner().RunAsync(acceleratedSpecification, progress, cancellationToken);
+                return;
+            }
+            catch (InvalidOperationException)
+            {
+                // A mirror can die mid-download; the plain download below still works, just slower.
+            }
+            finally
+            {
+                try
+                {
+                    File.Delete(accelerated.InfoJsonPath);
+                }
+                catch (IOException)
+                {
+                }
+            }
+        }
+
         var specification = new YtDlpCommandFactory().CreateDownload(job.Request, Path.GetDirectoryName(_toolchain.FfmpegPath)!);
         var runner = new YtDlpProcessRunner();
         var executableSpecification = specification with { ExecutablePath = _toolchain.YtDlpPath };

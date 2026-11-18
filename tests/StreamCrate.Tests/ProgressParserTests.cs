@@ -47,6 +47,14 @@ public sealed class ProgressParserTests
     }
 
     [Theory]
+    [InlineData("SCPROGRESS| 10.0%|9.81MiB/s|253708968|00:20", "241.96MiB")]
+    [InlineData("SCPROGRESS| 10.0%|9.81MiB/s|16777212.0|00:20", "16.00MiB")]
+    [InlineData("SCPROGRESS| 10.0%|9.81MiB/s|NA|00:20", "")]
+    [InlineData("SCPROGRESS| 10.0%|9.81MiB/s|       N/A|00:20", "")]
+    public void Formats_a_raw_byte_total(string line, string expected) =>
+        Assert.Equal(expected, YtDlpProgressParser.TryParse(line)!.TotalSize);
+
+    [Theory]
     [InlineData("[download] Destination: probeout\t.mp4")]
     [InlineData("[generic] big: Downloading webpage")]
     [InlineData("  0.0%| Unknown B/s|   3.57MiB|Unknown")]
