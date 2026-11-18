@@ -46,9 +46,24 @@ public sealed class YtDlpCommandFactory
             arguments.AddRange(["--format", BuildVideoFormat(request.Quality), "--merge-output-format", "mp4"]);
         }
 
+        if (IsBilibili(request.Media.SourceUrl))
+        {
+            // Bilibili's CDN answers HTTP 567 to any media request without a Range header, and
+            // yt-dlp's first request has none. Chunked downloads send a Range on every request.
+            arguments.AddRange(["--http-chunk-size", "10M"]);
+        }
+
         AddCookies(arguments, request.Cookies);
         arguments.Add(request.Media.SourceUrl.AbsoluteUri);
         return new ProcessSpecification("yt-dlp.exe", arguments, Redact(arguments, request.Cookies));
+    }
+
+    private static bool IsBilibili(Uri url)
+    {
+        var host = url.Host;
+        return host.Equals("bilibili.com", StringComparison.OrdinalIgnoreCase)
+            || host.EndsWith(".bilibili.com", StringComparison.OrdinalIgnoreCase)
+            || host.Equals("b23.tv", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string BuildVideoFormat(VideoQuality quality)

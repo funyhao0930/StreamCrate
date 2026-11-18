@@ -22,6 +22,24 @@ public sealed class YtDlpCommandFactoryTests
         Assert.Contains("mp4", specification.Arguments);
     }
 
+    [Theory]
+    [InlineData("https://www.bilibili.com/video/BV1xx411c7mD", true)]
+    [InlineData("https://m.bilibili.com/video/BV1xx411c7mD", true)]
+    [InlineData("https://b23.tv/abcdef", true)]
+    [InlineData("https://www.youtube.com/watch?v=abc123", false)]
+    [InlineData("https://notbilibili.com/video/1", false)]
+    public void Bilibili_download_uses_ranged_chunks_to_avoid_http_567(string url, bool expectChunks)
+    {
+        var request = DownloadRequest.CreateVideo(
+            new MediaItem("site", "abc123", "A permitted video", new Uri(url), TimeSpan.FromMinutes(2)),
+            @"C:\Downloads",
+            VideoQuality.Best);
+
+        var specification = new YtDlpCommandFactory().CreateDownload(request, @"C:\tools\ffmpeg");
+
+        Assert.Equal(expectChunks, specification.Arguments.Contains("--http-chunk-size"));
+    }
+
     [Fact]
     public void Cookies_file_is_passed_to_process_but_redacted_from_display_arguments()
     {
