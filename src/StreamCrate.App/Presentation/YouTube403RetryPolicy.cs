@@ -18,8 +18,9 @@ internal static class YouTube403RetryPolicy
 
         return specification with
         {
-            Arguments = ["--force-ipv4", .. specification.Arguments],
-            RedactedDisplayArguments = ["--force-ipv4", .. specification.RedactedDisplayArguments],
+            // CsWinRT (CsWinRT1032) rejects collection expressions typed as IReadOnlyList<T>.
+            Arguments = (string[])["--force-ipv4", .. specification.Arguments],
+            RedactedDisplayArguments = (string[])["--force-ipv4", .. specification.RedactedDisplayArguments],
         };
     }
 }

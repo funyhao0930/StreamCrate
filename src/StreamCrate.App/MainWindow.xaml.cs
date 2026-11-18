@@ -402,7 +402,7 @@ public sealed partial class MainWindow : Window
 
         return _probedMedia is null
             ? []
-            : [new DownloadRequest(_probedMedia, _settings.DownloadDirectory, format, quality, _probedCookies)];
+            : (DownloadRequest[])[new DownloadRequest(_probedMedia, _settings.DownloadDirectory, format, quality, _probedCookies)];
     }
 
     private void ViewQueueClicked(object sender, RoutedEventArgs args) => _ = SelectNavAsync("queue");
@@ -1116,10 +1116,10 @@ public sealed partial class MainWindow : Window
 
     private (UIElement Title, UIElement Subtitle, IReadOnlyList<UIElement> Content) GetPageEntranceElements(string? tag) => tag switch
     {
-        "queue" => (QueuePageTitle, QueuePageSubtitle, [QueueBoard]),
-        "history" => (HistoryPageTitle, HistoryPageSubtitle, [HistoryControls, HistoryStatsPanel, HistoryEmptyState]),
-        "settings" => (SettingsPageTitle, SettingsPageSubtitle, [DownloadDefaultsCard, AppearanceCard, UpdateCard, SettingsSavePanel]),
-        _ => (DownloadPageTitle, DownloadPageSubtitle, [DownloadPrimaryCard, ResolvedResultPanel]),
+        "queue" => (QueuePageTitle, QueuePageSubtitle, (UIElement[])[QueueBoard]),
+        "history" => (HistoryPageTitle, HistoryPageSubtitle, (UIElement[])[HistoryControls, HistoryStatsPanel, HistoryEmptyState]),
+        "settings" => (SettingsPageTitle, SettingsPageSubtitle, (UIElement[])[DownloadDefaultsCard, AppearanceCard, UpdateCard, SettingsSavePanel]),
+        _ => (DownloadPageTitle, DownloadPageSubtitle, (UIElement[])[DownloadPrimaryCard, ResolvedResultPanel]),
     };
 
     private async Task AnimateItemContainersAsync(string? tag, int delay)
@@ -1331,8 +1331,8 @@ public sealed partial class MainWindow : Window
 
     private IReadOnlyList<ItemsControl> GetAnimatedItemLists(string? tag) => tag switch
     {
-        "queue" => [InProgressQueueList, CompletedQueueList, FailedQueueList],
-        "history" => [HistoryList],
+        "queue" => (ItemsControl[])[InProgressQueueList, CompletedQueueList, FailedQueueList],
+        "history" => (ItemsControl[])[HistoryList],
         _ => [],
     };
 
