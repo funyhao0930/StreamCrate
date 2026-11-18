@@ -59,8 +59,11 @@ jobs:
           $version = "${{ github.ref_name }}".TrimStart('v', 'V')
           if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "Tag must look like v1.2.3, got ${{ github.ref_name }}" }
           "APP_VERSION=$version" >> $env:GITHUB_ENV
+      # The solution restore above does not fetch the self-contained runtime pack, so publish
+      # restores again (still locked). No -r: the app csproj already sets win-x64, and a
+      # command-line RID would also reach Core/Infrastructure, whose lock files have none.
       - name: Publish self-contained x64 app
-        run: dotnet publish $env:APP_PROJECT -c Release -r win-x64 --self-contained true -p:Platform=x64 -p:Version=$env:APP_VERSION --no-restore -o $env:PUBLISH_DIR
+        run: dotnet publish $env:APP_PROJECT -c Release -p:SelfContained=true -p:Platform=x64 -p:Version=$env:APP_VERSION -p:RestoreLockedMode=true -o $env:PUBLISH_DIR
       - name: Build Inno Setup installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
         with:
